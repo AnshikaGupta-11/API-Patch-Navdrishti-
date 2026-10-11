@@ -1,0 +1,1467 @@
+{
+  "services": {
+    "weather": {
+      "id": "weather",
+      "name": "Weather API",
+      "type": "REST API",
+      "description": "Public weather endpoint providing temperature and conditions",
+      "endpoint": "https://api.weather.com/v1/current",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "97.4%",
+      "responseTimeMs": 240,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "temperature": 24,
+          "condition": "Sunny",
+          "humidity": 45,
+          "city_name": "Indore"
+        }
+      },
+      "dependentWorkflows": [
+        "Weather Dashboard",
+        "Homepage",
+        "Notification Service",
+        "City Search",
+        "Mobile App"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "users": {
+      "id": "users",
+      "name": "Users API",
+      "type": "SDK Adapter",
+      "description": "Internal User Identity client adapter (v1 name vs v2 displayName)",
+      "endpoint": "https://api.internal.org/v1/users/1",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.9%",
+      "responseTimeMs": 210,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "id": 1,
+          "displayName": "Rahul"
+        }
+      },
+      "dependentWorkflows": [
+        "Profile Page",
+        "Greeting Service",
+        "Order History"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "products": {
+      "id": "products",
+      "name": "Products API",
+      "type": "REST API",
+      "description": "Catalog product details endpoint with strict pricing types",
+      "endpoint": "https://api.catalog.internal/v1/products/101",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.8%",
+      "responseTimeMs": 185,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "id": 101,
+          "title": "Notebook",
+          "price": 50
+        }
+      },
+      "dependentWorkflows": [
+        "Product Page",
+        "Cart Total",
+        "Checkout Service",
+        "Search Results"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "payments": {
+      "id": "payments",
+      "name": "Payments API",
+      "type": "Semantic Status Service",
+      "description": "Payment processing state provider with immediate settlement semantics",
+      "endpoint": "https://api.checkout.internal/v1/payments/ORD-1",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.8%",
+      "responseTimeMs": 320,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "orderId": "ORD-1",
+          "status": "PAID",
+          "amount": 1500
+        }
+      },
+      "dependentWorkflows": [
+        "Order Status",
+        "Payment Confirmation",
+        "Immediate Checkout"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "github": {
+      "id": "github",
+      "name": "GitHub API",
+      "type": "Rate-Limited Service",
+      "description": "VCS API with rate limiting and version headers",
+      "endpoint": "https://api.github.com/v3",
+      "status": "DEGRADED",
+      "changed": true,
+      "uptime": "99.7%",
+      "responseTimeMs": 260,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "headers": {
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4990"
+        },
+        "body": {
+          "status": "operational"
+        }
+      },
+      "dependentWorkflows": [
+        "CI/CD Pipeline",
+        "Release Sync",
+        "Commit Monitor"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "stripe": {
+      "id": "stripe",
+      "name": "Stripe API",
+      "type": "Rate-Limited Service",
+      "description": "Payment gateway with latency monitoring and transaction charges",
+      "endpoint": "https://api.stripe.com/v1/charges",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.8%",
+      "responseTimeMs": 220,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "responseTimeMs": 220,
+        "body": {
+          "chargeId": "ch_123",
+          "paid": true
+        }
+      },
+      "dependentWorkflows": [
+        "Checkout Flow",
+        "Subscription Billing"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "openai": {
+      "id": "openai",
+      "name": "OpenAI API",
+      "type": "MCP / AI Service",
+      "description": "Model context provider & AI completions",
+      "endpoint": "https://api.openai.com/v1/models",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.9%",
+      "responseTimeMs": 210,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "object": "list",
+          "data": []
+        }
+      },
+      "dependentWorkflows": [
+        "AI Assistant",
+        "Smart Code Generation"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "inventory-mcp": {
+      "id": "inventory-mcp",
+      "name": "Inventory MCP Service",
+      "type": "MCP Server",
+      "description": "Local MCP Tool Provider for real-time inventory queries",
+      "endpoint": "mcp://inventory-service/tools/lookup_stock",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.9%",
+      "responseTimeMs": 140,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "sku": "SKU-9921",
+          "in_stock": 420,
+          "reserved_units": 15
+        }
+      },
+      "dependentWorkflows": [
+        "Warehouse Dispatch",
+        "Inventory Sync",
+        "Order Fulfillment"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    },
+    "webhook-events": {
+      "id": "webhook-events",
+      "name": "Partner Webhook Source",
+      "type": "Webhook Event Source",
+      "description": "External partner webhook publisher emitting contract change notifications",
+      "endpoint": "https://events.partner-api.com/v1/stream",
+      "status": "HEALTHY",
+      "changed": false,
+      "uptime": "99.9%",
+      "responseTimeMs": 95,
+      "lastObservedAt": "2026-10-11T06:37:50.752Z",
+      "current": {
+        "statusCode": 200,
+        "body": {
+          "streamStatus": "active",
+          "ingestedEventsCount": 1480
+        }
+      },
+      "dependentWorkflows": [
+        "Order Event Ingestion",
+        "Partner Notification Pipeline"
+      ],
+      "remediationStatus": "HEALTHY",
+      "changeHistory": []
+    }
+  },
+  "baselines": {
+    "weather": {
+      "statusCode": 200,
+      "body": {
+        "temp": 24,
+        "condition": "Sunny",
+        "humidity": 45,
+        "city": "Indore"
+      },
+      "requiredFields": [
+        "temp",
+        "condition",
+        "humidity",
+        "city"
+      ]
+    },
+    "users": {
+      "statusCode": 200,
+      "body": {
+        "id": 1,
+        "name": "Rahul"
+      },
+      "requiredFields": [
+        "id",
+        "name"
+      ]
+    },
+    "products": {
+      "statusCode": 200,
+      "body": {
+        "id": 101,
+        "title": "Notebook",
+        "price": 50
+      },
+      "requiredFields": [
+        "id",
+        "title",
+        "price"
+      ]
+    },
+    "payments": {
+      "statusCode": 200,
+      "body": {
+        "orderId": "ORD-1",
+        "status": "PAID",
+        "amount": 1500
+      },
+      "requiredFields": [
+        "orderId",
+        "status"
+      ]
+    },
+    "github": {
+      "statusCode": 200,
+      "headers": {
+        "x-ratelimit-limit": "5000"
+      },
+      "body": {
+        "status": "operational"
+      },
+      "requiredFields": [
+        "status"
+      ]
+    },
+    "stripe": {
+      "statusCode": 200,
+      "responseTimeMs": 220,
+      "body": {
+        "chargeId": "ch_123",
+        "paid": true
+      },
+      "requiredFields": [
+        "chargeId",
+        "paid"
+      ]
+    },
+    "openai": {
+      "statusCode": 200,
+      "body": {
+        "object": "list",
+        "data": []
+      },
+      "requiredFields": [
+        "object"
+      ]
+    },
+    "inventory-mcp": {
+      "statusCode": 200,
+      "body": {
+        "sku": "SKU-9921",
+        "in_stock": 420,
+        "reserved_units": 15
+      },
+      "requiredFields": [
+        "sku",
+        "in_stock"
+      ]
+    },
+    "webhook-events": {
+      "statusCode": 200,
+      "body": {
+        "streamStatus": "active",
+        "ingestedEventsCount": 1480
+      },
+      "requiredFields": [
+        "streamStatus"
+      ]
+    }
+  },
+  "dependencies": {
+    "weather.temp": {
+      "workflows": [
+        "Weather Dashboard",
+        "Homepage",
+        "Notification Service"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "GET /weather/current",
+          "service": "Frontend",
+          "impact": "High",
+          "description": "Missing field: temp -> temperature"
+        },
+        {
+          "endpoint": "GET /notifications",
+          "service": "Backend",
+          "impact": "Medium",
+          "description": "Weather notification alerts"
+        }
+      ]
+    },
+    "weather.city": {
+      "workflows": [
+        "City Search",
+        "Weather Dashboard",
+        "Mobile App"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "POST /weather/search",
+          "service": "Frontend",
+          "impact": "Medium",
+          "description": "Response format changed for city search"
+        },
+        {
+          "endpoint": "GET /mobile/sync",
+          "service": "External",
+          "impact": "High",
+          "description": "Mobile App location data binding"
+        }
+      ]
+    },
+    "weather.condition": {
+      "workflows": [
+        "Weather Dashboard",
+        "Data Aggregator"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "GET /aggregator/feed",
+          "service": "Backend",
+          "impact": "Medium",
+          "description": "Data mapping required"
+        }
+      ]
+    },
+    "weather.humidity": {
+      "workflows": [
+        "Weather Dashboard"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "GET /user/preferences",
+          "service": "Backend",
+          "impact": "Low",
+          "description": "Optional climate preference display"
+        }
+      ]
+    },
+    "users.name": {
+      "workflows": [
+        "Profile Page",
+        "Greeting Service"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "GET /v1/users/1",
+          "service": "SDK Adapter",
+          "impact": "High",
+          "description": "Missing name property on User entity"
+        }
+      ]
+    },
+    "users.id": [
+      "Profile Page",
+      "Order History"
+    ],
+    "products.price": [
+      "Product Page",
+      "Cart Total",
+      "Checkout Service"
+    ],
+    "products.title": [
+      "Product Page",
+      "Search Results"
+    ],
+    "payments.status": [
+      "Order Status",
+      "Payment Confirmation",
+      "Immediate Checkout"
+    ],
+    "inventory-mcp.sku": {
+      "workflows": [
+        "Warehouse Dispatch",
+        "Inventory Sync",
+        "Order Fulfillment"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "mcp://inventory-service/tools/lookup_stock",
+          "service": "MCP Server",
+          "impact": "High",
+          "description": "Tool contract broken: SKU parameter missing"
+        }
+      ]
+    },
+    "webhook-events.streamStatus": {
+      "workflows": [
+        "Order Event Ingestion",
+        "Partner Notification Pipeline"
+      ],
+      "endpoints": [
+        {
+          "endpoint": "POST /api/webhooks/receiver",
+          "service": "Backend",
+          "impact": "High",
+          "description": "Partner webhook listener degradation"
+        }
+      ]
+    }
+  },
+  "adapters": {
+    "users": {
+      "serviceId": "users",
+      "type": "FIELD_MAPPING",
+      "mappings": [
+        {
+          "from": "displayName",
+          "to": "name"
+        }
+      ],
+      "from": "displayName",
+      "to": "name",
+      "appliedAt": "2026-10-11T06:57:24.378Z",
+      "enabled": true
+    },
+    "weather": {
+      "serviceId": "weather",
+      "type": "FIELD_MAPPING",
+      "mappings": [
+        {
+          "from": "temperature",
+          "to": "temp"
+        },
+        {
+          "from": "city_name",
+          "to": "city"
+        }
+      ],
+      "from": "temperature",
+      "to": "temp",
+      "appliedAt": "2026-10-11T06:38:52.787Z",
+      "enabled": true
+    }
+  },
+  "incidents": [
+    {
+      "id": "INC-004",
+      "serviceId": "github",
+      "serviceName": "GitHub API",
+      "status": "DETECTED",
+      "severity": "MEDIUM",
+      "changes": [
+        {
+          "kind": "HEADER_ADDED",
+          "path": "$headers.x-ratelimit-remaining",
+          "severity": "MINOR",
+          "actual": "4990",
+          "message": "Header added: x-ratelimit-remaining"
+        }
+      ],
+      "impact": {
+        "affectedWorkflows": [],
+        "affectedServicesAndPages": {
+          "totalAffected": 0,
+          "frontendPages": [],
+          "backendServices": [],
+          "externalIntegrations": []
+        },
+        "impactSeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 1
+        },
+        "affectedEndpoints": [
+          {
+            "endpoint": "/api/github/current",
+            "service": "Frontend",
+            "impact": "Low",
+            "description": "Header added: x-ratelimit-remaining",
+            "field": "$headers.x-ratelimit-remaining"
+          }
+        ],
+        "details": [
+          {
+            "field": "$headers.x-ratelimit-remaining",
+            "changeKind": "HEADER_ADDED",
+            "severity": "MINOR",
+            "workflows": []
+          }
+        ],
+        "totalAffectedWorkflows": 0,
+        "note": "No direct dependency was found in the configured dependency map; review manually."
+      },
+      "repairProposal": null,
+      "validation": null,
+      "createdAt": "2026-10-11T06:37:50.752Z",
+      "updatedAt": "2026-10-11T06:37:50.752Z",
+      "history": [
+        {
+          "status": "DETECTED",
+          "timestamp": "2026-10-11T06:37:50.752Z",
+          "message": "Detected 1 contract difference(s) on GitHub API"
+        }
+      ]
+    },
+    {
+      "id": "INC-003",
+      "serviceId": "weather",
+      "serviceName": "Weather API",
+      "status": "VALIDATED",
+      "severity": "HIGH",
+      "changes": [
+        {
+          "kind": "MISSING_FIELD",
+          "path": "temp",
+          "severity": "BREAKING",
+          "expected": 24,
+          "renamedTo": "temperature",
+          "message": "Field \"temp\" renamed to \"temperature\""
+        },
+        {
+          "kind": "MISSING_FIELD",
+          "path": "city",
+          "severity": "BREAKING",
+          "expected": "Indore",
+          "renamedTo": "city_name",
+          "message": "Field \"city\" renamed to \"city_name\""
+        },
+        {
+          "kind": "ADDED_FIELD",
+          "path": "temperature",
+          "severity": "BREAKING",
+          "actual": 24,
+          "renamedFrom": "temp",
+          "message": "New field \"temperature\" replaces \"temp\""
+        },
+        {
+          "kind": "ADDED_FIELD",
+          "path": "city_name",
+          "severity": "BREAKING",
+          "actual": "Indore",
+          "renamedFrom": "city",
+          "message": "New field \"city_name\" replaces \"city\""
+        },
+        {
+          "kind": "FIELD_RENAMED",
+          "path": "temp",
+          "targetPath": "temperature",
+          "severity": "BREAKING",
+          "expected": "temp",
+          "actual": "temperature",
+          "rename": {
+            "from": "temp",
+            "to": "temperature"
+          },
+          "message": "Field \"temp\" renamed to \"temperature\""
+        },
+        {
+          "kind": "FIELD_RENAMED",
+          "path": "city",
+          "targetPath": "city_name",
+          "severity": "BREAKING",
+          "expected": "city",
+          "actual": "city_name",
+          "rename": {
+            "from": "city",
+            "to": "city_name"
+          },
+          "message": "Field \"city\" renamed to \"city_name\""
+        }
+      ],
+      "impact": {
+        "affectedWorkflows": [
+          "Weather Dashboard",
+          "Homepage",
+          "Notification Service",
+          "City Search",
+          "Mobile App"
+        ],
+        "affectedServicesAndPages": {
+          "totalAffected": 5,
+          "frontendPages": [
+            "Weather Dashboard",
+            "Homepage",
+            "City Search"
+          ],
+          "backendServices": [
+            "Notification Service"
+          ],
+          "externalIntegrations": [
+            "Mobile App"
+          ]
+        },
+        "impactSeverity": {
+          "high": 6,
+          "medium": 4,
+          "low": 0
+        },
+        "affectedEndpoints": [
+          {
+            "endpoint": "GET /weather/current",
+            "service": "Frontend",
+            "impact": "High",
+            "description": "Missing field: temp -> temperature"
+          },
+          {
+            "endpoint": "GET /notifications",
+            "service": "Backend",
+            "impact": "Medium",
+            "description": "Weather notification alerts"
+          },
+          {
+            "endpoint": "POST /weather/search",
+            "service": "Frontend",
+            "impact": "Medium",
+            "description": "Response format changed for city search"
+          },
+          {
+            "endpoint": "GET /mobile/sync",
+            "service": "External",
+            "impact": "High",
+            "description": "Mobile App location data binding"
+          },
+          {
+            "endpoint": "/api/weather/current",
+            "service": "Frontend",
+            "impact": "High",
+            "description": "New field \"temperature\" replaces \"temp\"",
+            "field": "temperature"
+          },
+          {
+            "endpoint": "/api/weather/current",
+            "service": "Frontend",
+            "impact": "High",
+            "description": "New field \"city_name\" replaces \"city\"",
+            "field": "city_name"
+          },
+          {
+            "endpoint": "GET /weather/current",
+            "service": "Frontend",
+            "impact": "High",
+            "description": "Missing field: temp -> temperature"
+          },
+          {
+            "endpoint": "GET /notifications",
+            "service": "Backend",
+            "impact": "Medium",
+            "description": "Weather notification alerts"
+          },
+          {
+            "endpoint": "POST /weather/search",
+            "service": "Frontend",
+            "impact": "Medium",
+            "description": "Response format changed for city search"
+          },
+          {
+            "endpoint": "GET /mobile/sync",
+            "service": "External",
+            "impact": "High",
+            "description": "Mobile App location data binding"
+          }
+        ],
+        "details": [
+          {
+            "field": "temp",
+            "changeKind": "MISSING_FIELD",
+            "severity": "BREAKING",
+            "workflows": [
+              "Weather Dashboard",
+              "Homepage",
+              "Notification Service"
+            ]
+          },
+          {
+            "field": "city",
+            "changeKind": "MISSING_FIELD",
+            "severity": "BREAKING",
+            "workflows": [
+              "City Search",
+              "Weather Dashboard",
+              "Mobile App"
+            ]
+          },
+          {
+            "field": "temperature",
+            "changeKind": "ADDED_FIELD",
+            "severity": "BREAKING",
+            "workflows": []
+          },
+          {
+            "field": "city_name",
+            "changeKind": "ADDED_FIELD",
+            "severity": "BREAKING",
+            "workflows": []
+          },
+          {
+            "field": "temp",
+            "changeKind": "FIELD_RENAMED",
+            "severity": "BREAKING",
+            "workflows": [
+              "Weather Dashboard",
+              "Homepage",
+              "Notification Service"
+            ]
+          },
+          {
+            "field": "city",
+            "changeKind": "FIELD_RENAMED",
+            "severity": "BREAKING",
+            "workflows": [
+              "City Search",
+              "Weather Dashboard",
+              "Mobile App"
+            ]
+          }
+        ],
+        "totalAffectedWorkflows": 5,
+        "note": "Impact is calculated from the registered dependency architecture graph."
+      },
+      "source": "webhook",
+      "repairProposal": {
+        "id": "PROP-1791700732776",
+        "type": "FIELD_MAPPING",
+        "serviceId": "weather",
+        "mapping": {
+          "from": "temperature",
+          "to": "temp"
+        },
+        "mappings": [
+          {
+            "from": "temperature",
+            "to": "temp"
+          },
+          {
+            "from": "city_name",
+            "to": "city"
+          }
+        ],
+        "diff": "Update your code to use the new field names:\n-   temp: data.temp,\n-   city: data.city\n+\n+   temperature: data.temperature,\n+   city_name: data.city_name",
+        "adapterCode": "// Compatibility Adapter for Weather API\nfunction adapt(data) {\n  if (data.temperature !== undefined) {\n    data.temp = data.temperature;\n    delete data.temperature;\n  }\n  if (data.city_name !== undefined) {\n    data.city = data.city_name;\n    delete data.city_name;\n  }\n  return data;\n}",
+        "rationale": "Upstream Weather API renamed \"temp\" to \"temperature\" and \"city\" to \"city_name\". Adapter maps new response fields back to original contract keys.",
+        "risk": "LOW",
+        "requiresHumanApproval": true,
+        "approved": true,
+        "suggestedAction": "Apply Automatically with explicit approval",
+        "approvedAt": "2026-10-11T06:38:52.787Z",
+        "approvedBy": "Chinmay Bulani"
+      },
+      "validation": {
+        "passed": true,
+        "status": "PASSED",
+        "ranAt": "2026-10-11T06:38:52.796Z",
+        "checks": [
+          {
+            "name": "http_status_matches",
+            "category": "API Response Structure",
+            "expected": 200,
+            "actual": 200,
+            "passed": true,
+            "message": "HTTP status 200 matches baseline"
+          },
+          {
+            "name": "required_field:temp",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "required_field:condition",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "required_field:humidity",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "required_field:city",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "temp_value_preserved",
+            "category": "Data Integrity",
+            "expected": 24,
+            "actual": 24,
+            "passed": true
+          },
+          {
+            "name": "dependent_services_compatibility",
+            "category": "Dependent Services",
+            "expected": "contracts_satisfied",
+            "actual": "contracts_satisfied",
+            "passed": true
+          },
+          {
+            "name": "frontend_pages_operability",
+            "category": "Frontend Functionality",
+            "expected": "all_views_healthy",
+            "actual": "all_views_healthy",
+            "passed": true
+          },
+          {
+            "name": "adapter_performance_overhead",
+            "category": "Performance Check",
+            "expected": "< 50ms overhead",
+            "actual": "1ms",
+            "passed": true
+          },
+          {
+            "name": "no_contract_differences",
+            "category": "Contract Compliance",
+            "expected": 0,
+            "actual": 0,
+            "passed": true
+          }
+        ],
+        "summary": {
+          "totalChecks": 10,
+          "passedChecks": 10,
+          "failedChecks": 0
+        },
+        "normalizedResponse": {
+          "statusCode": 200,
+          "body": {
+            "condition": "Sunny",
+            "humidity": 45,
+            "temp": 24,
+            "city": "Indore"
+          }
+        },
+        "remainingChanges": [],
+        "logs": [
+          "[2026-10-11T06:38:52.796Z] Initiating regression validation for service \"Weather API\" (weather)",
+          "Validation finished. Status: PASSED"
+        ]
+      },
+      "createdAt": "2026-10-11T06:37:48.041Z",
+      "updatedAt": "2026-10-11T06:38:52.796Z",
+      "history": [
+        {
+          "status": "DETECTED",
+          "timestamp": "2026-10-11T06:37:48.041Z",
+          "message": "Webhook event 'dependency.changed' (evt-sim-1791700668031-d27n0) triggered detection: 6 difference(s)"
+        },
+        {
+          "status": "MANUAL_REVIEW_REQUIRED",
+          "timestamp": "2026-10-11T06:38:46.703Z",
+          "message": "Rejected by engineer for manual review"
+        },
+        {
+          "status": "REPAIR_PROPOSED",
+          "timestamp": "2026-10-11T06:38:52.776Z",
+          "message": "Repair proposal generated (FIELD_MAPPING). Awaiting explicit human approval."
+        },
+        {
+          "status": "REPAIR_APPLIED",
+          "timestamp": "2026-10-11T06:38:52.787Z",
+          "message": "Approved compatibility adapter applied by Chinmay Bulani"
+        },
+        {
+          "status": "VALIDATED",
+          "timestamp": "2026-10-11T06:38:52.796Z",
+          "message": "All 5 regression validation test suites passed. Incident resolved."
+        }
+      ]
+    },
+    {
+      "id": "INC-002",
+      "serviceId": "users",
+      "serviceName": "Users API & SDK",
+      "status": "VALIDATED",
+      "severity": "HIGH",
+      "changes": [
+        {
+          "kind": "MISSING_FIELD",
+          "path": "name",
+          "severity": "BREAKING",
+          "expected": "Rahul",
+          "renamedTo": "displayName",
+          "message": "Field \"name\" renamed to \"displayName\""
+        },
+        {
+          "kind": "ADDED_FIELD",
+          "path": "displayName",
+          "severity": "BREAKING",
+          "actual": "Rahul",
+          "renamedFrom": "name",
+          "message": "New field \"displayName\" replaces \"name\""
+        },
+        {
+          "kind": "FIELD_RENAMED",
+          "path": "name",
+          "targetPath": "displayName",
+          "severity": "BREAKING",
+          "expected": "name",
+          "actual": "displayName",
+          "rename": {
+            "from": "name",
+            "to": "displayName"
+          },
+          "message": "Field \"name\" renamed to \"displayName\""
+        }
+      ],
+      "impact": {
+        "affectedWorkflows": [
+          "Profile Page",
+          "Greeting Service"
+        ],
+        "affectedServicesAndPages": {
+          "totalAffected": 2,
+          "frontendPages": [
+            "Profile Page"
+          ],
+          "backendServices": [
+            "Greeting Service"
+          ],
+          "externalIntegrations": []
+        },
+        "impactSeverity": {
+          "high": 3,
+          "medium": 0,
+          "low": 0
+        },
+        "affectedEndpoints": [
+          {
+            "endpoint": "GET /v1/users/1",
+            "service": "SDK Adapter",
+            "impact": "High",
+            "description": "Missing name property on User entity"
+          },
+          {
+            "endpoint": "/api/users/current",
+            "service": "Frontend",
+            "impact": "High",
+            "description": "New field \"displayName\" replaces \"name\"",
+            "field": "displayName"
+          },
+          {
+            "endpoint": "GET /v1/users/1",
+            "service": "SDK Adapter",
+            "impact": "High",
+            "description": "Missing name property on User entity"
+          }
+        ],
+        "details": [
+          {
+            "field": "name",
+            "changeKind": "MISSING_FIELD",
+            "severity": "BREAKING",
+            "workflows": [
+              "Profile Page",
+              "Greeting Service"
+            ]
+          },
+          {
+            "field": "displayName",
+            "changeKind": "ADDED_FIELD",
+            "severity": "BREAKING",
+            "workflows": []
+          },
+          {
+            "field": "name",
+            "changeKind": "FIELD_RENAMED",
+            "severity": "BREAKING",
+            "workflows": [
+              "Profile Page",
+              "Greeting Service"
+            ]
+          }
+        ],
+        "totalAffectedWorkflows": 2,
+        "note": "Impact is calculated from the registered dependency architecture graph."
+      },
+      "repairProposal": {
+        "id": "PROP-1791700669832",
+        "type": "FIELD_MAPPING",
+        "serviceId": "users",
+        "mapping": {
+          "from": "displayName",
+          "to": "name"
+        },
+        "mappings": [
+          {
+            "from": "displayName",
+            "to": "name"
+          }
+        ],
+        "diff": "- name: data.name\n+ displayName: data.displayName",
+        "adapterCode": "// Compatibility Adapter for Users API / SDK\nfunction adapt(data) {\n  if (data.displayName !== undefined) {\n    data.name = data.displayName;\n    delete data.displayName;\n  }\n  return data;\n}",
+        "rationale": "Upstream User service/SDK renamed \"name\" to \"displayName\". Adapter restores expected contract.",
+        "risk": "MEDIUM",
+        "confidence": 0.95,
+        "requiresHumanApproval": true,
+        "approved": true,
+        "suggestedAction": "Apply Automatically with explicit approval",
+        "approvedAt": "2026-10-11T06:57:24.378Z",
+        "approvedBy": "Chinmay Bulani"
+      },
+      "validation": {
+        "passed": true,
+        "status": "PASSED",
+        "ranAt": "2026-10-11T06:57:24.400Z",
+        "checks": [
+          {
+            "name": "http_status_matches",
+            "category": "API Response Structure",
+            "expected": 200,
+            "actual": 200,
+            "passed": true,
+            "message": "HTTP status 200 matches baseline"
+          },
+          {
+            "name": "required_field:id",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "required_field:name",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "name_value_preserved",
+            "category": "Data Integrity",
+            "expected": "Rahul",
+            "actual": "Rahul",
+            "passed": true
+          },
+          {
+            "name": "dependent_services_compatibility",
+            "category": "Dependent Services",
+            "expected": "contracts_satisfied",
+            "actual": "contracts_satisfied",
+            "passed": true
+          },
+          {
+            "name": "frontend_pages_operability",
+            "category": "Frontend Functionality",
+            "expected": "all_views_healthy",
+            "actual": "all_views_healthy",
+            "passed": true
+          },
+          {
+            "name": "adapter_performance_overhead",
+            "category": "Performance Check",
+            "expected": "< 50ms overhead",
+            "actual": "1ms",
+            "passed": true
+          },
+          {
+            "name": "no_contract_differences",
+            "category": "Contract Compliance",
+            "expected": 0,
+            "actual": 0,
+            "passed": true
+          }
+        ],
+        "summary": {
+          "totalChecks": 8,
+          "passedChecks": 8,
+          "failedChecks": 0
+        },
+        "normalizedResponse": {
+          "statusCode": 200,
+          "body": {
+            "id": 1,
+            "name": "Rahul"
+          }
+        },
+        "remainingChanges": [],
+        "logs": [
+          "[2026-10-11T06:57:24.399Z] Initiating regression validation for service \"Users API\" (users)",
+          "Validation finished. Status: PASSED"
+        ]
+      },
+      "createdAt": "2026-10-11T06:37:44.591Z",
+      "updatedAt": "2026-10-11T06:57:24.400Z",
+      "history": [
+        {
+          "status": "REPAIR_PROPOSED",
+          "timestamp": "2026-10-11T06:37:49.832Z",
+          "message": "Repair proposal generated (FIELD_MAPPING). Awaiting explicit human approval."
+        },
+        {
+          "status": "REPAIR_APPLIED",
+          "timestamp": "2026-10-11T06:37:49.861Z",
+          "message": "Approved compatibility adapter applied by Chinmay Bulani"
+        },
+        {
+          "status": "VALIDATED",
+          "timestamp": "2026-10-11T06:37:49.880Z",
+          "message": "All 5 regression validation test suites passed. Incident resolved."
+        },
+        {
+          "status": "REPAIR_APPLIED",
+          "timestamp": "2026-10-11T06:57:24.378Z",
+          "message": "Approved compatibility adapter applied by Chinmay Bulani"
+        },
+        {
+          "status": "VALIDATED",
+          "timestamp": "2026-10-11T06:57:24.400Z",
+          "message": "All 5 regression validation test suites passed. Incident resolved."
+        }
+      ]
+    },
+    {
+      "id": "INC-001",
+      "serviceId": "users",
+      "serviceName": "Users API & SDK",
+      "status": "DETECTED",
+      "severity": "HIGH",
+      "changes": [
+        {
+          "kind": "MISSING_FIELD",
+          "path": "name",
+          "severity": "BREAKING",
+          "expected": "Rahul",
+          "renamedTo": "displayName",
+          "message": "Field \"name\" renamed to \"displayName\""
+        },
+        {
+          "kind": "ADDED_FIELD",
+          "path": "displayName",
+          "severity": "BREAKING",
+          "actual": "Rahul",
+          "renamedFrom": "name",
+          "message": "New field \"displayName\" replaces \"name\""
+        },
+        {
+          "kind": "FIELD_RENAMED",
+          "path": "name",
+          "targetPath": "displayName",
+          "severity": "BREAKING",
+          "expected": "name",
+          "actual": "displayName",
+          "rename": {
+            "from": "name",
+            "to": "displayName"
+          },
+          "message": "Field \"name\" renamed to \"displayName\""
+        }
+      ],
+      "impact": {
+        "affectedWorkflows": [
+          "Profile Page",
+          "Greeting Service"
+        ],
+        "affectedServicesAndPages": {
+          "totalAffected": 2,
+          "frontendPages": [
+            "Profile Page"
+          ],
+          "backendServices": [
+            "Greeting Service"
+          ],
+          "externalIntegrations": []
+        },
+        "impactSeverity": {
+          "high": 3,
+          "medium": 0,
+          "low": 0
+        },
+        "affectedEndpoints": [
+          {
+            "endpoint": "GET /v1/users/1",
+            "service": "SDK Adapter",
+            "impact": "High",
+            "description": "Missing name property on User entity"
+          },
+          {
+            "endpoint": "/api/users/current",
+            "service": "Frontend",
+            "impact": "High",
+            "description": "New field \"displayName\" replaces \"name\"",
+            "field": "displayName"
+          },
+          {
+            "endpoint": "GET /v1/users/1",
+            "service": "SDK Adapter",
+            "impact": "High",
+            "description": "Missing name property on User entity"
+          }
+        ],
+        "details": [
+          {
+            "field": "name",
+            "changeKind": "MISSING_FIELD",
+            "severity": "BREAKING",
+            "workflows": [
+              "Profile Page",
+              "Greeting Service"
+            ]
+          },
+          {
+            "field": "displayName",
+            "changeKind": "ADDED_FIELD",
+            "severity": "BREAKING",
+            "workflows": []
+          },
+          {
+            "field": "name",
+            "changeKind": "FIELD_RENAMED",
+            "severity": "BREAKING",
+            "workflows": [
+              "Profile Page",
+              "Greeting Service"
+            ]
+          }
+        ],
+        "totalAffectedWorkflows": 2,
+        "note": "Impact is calculated from the registered dependency architecture graph."
+      },
+      "repairProposal": null,
+      "validation": null,
+      "createdAt": "2026-10-11T06:37:38.703Z",
+      "updatedAt": "2026-10-11T06:37:50.752Z"
+    }
+  ],
+  "recentActivity": [
+    {
+      "id": "act-1791701844400",
+      "timestamp": "2026-10-11T06:57:24.400Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API",
+      "type": "RESOLVED",
+      "badge": "resolved",
+      "message": "Users API - issue resolved and validated"
+    },
+    {
+      "id": "act-1791701844378",
+      "timestamp": "2026-10-11T06:57:24.378Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API & SDK",
+      "type": "RESOLVED",
+      "badge": "repaired",
+      "message": "Compatibility adapter applied for Users API & SDK"
+    },
+    {
+      "id": "act-1791700732796",
+      "timestamp": "2026-10-11T06:38:52.796Z",
+      "timeAgo": "Just now",
+      "serviceId": "weather",
+      "serviceName": "Weather API",
+      "type": "RESOLVED",
+      "badge": "resolved",
+      "message": "Weather API - issue resolved and validated"
+    },
+    {
+      "id": "act-1791700732787",
+      "timestamp": "2026-10-11T06:38:52.787Z",
+      "timeAgo": "Just now",
+      "serviceId": "weather",
+      "serviceName": "Weather API",
+      "type": "RESOLVED",
+      "badge": "repaired",
+      "message": "Compatibility adapter applied for Weather API"
+    },
+    {
+      "id": "act-1791700670752",
+      "timestamp": "2026-10-11T06:37:50.752Z",
+      "timeAgo": "Just now",
+      "serviceId": "github",
+      "serviceName": "GitHub API",
+      "type": "CHANGED",
+      "badge": "changed",
+      "message": "GitHub API contract change detected (1 change(s))"
+    },
+    {
+      "id": "act-1791700670736",
+      "timestamp": "2026-10-11T06:37:50.736Z",
+      "timeAgo": "Just now",
+      "serviceId": "weather",
+      "serviceName": "Weather API",
+      "type": "CHANGED",
+      "badge": "changed",
+      "message": "Weather API response changed (2 fields modified: temp -> temperature, city -> city_name)"
+    },
+    {
+      "id": "act-1791700669880",
+      "timestamp": "2026-10-11T06:37:49.880Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API",
+      "type": "RESOLVED",
+      "badge": "resolved",
+      "message": "Users API - issue resolved and validated"
+    },
+    {
+      "id": "act-1791700669861",
+      "timestamp": "2026-10-11T06:37:49.861Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API & SDK",
+      "type": "RESOLVED",
+      "badge": "repaired",
+      "message": "Compatibility adapter applied for Users API & SDK"
+    },
+    {
+      "id": "act-1791700668038",
+      "timestamp": "2026-10-11T06:37:48.038Z",
+      "timeAgo": "Just now",
+      "serviceId": "weather",
+      "serviceName": "Weather API",
+      "type": "CHANGED",
+      "badge": "changed",
+      "message": "Weather API response changed (2 fields modified: temp -> temperature, city -> city_name)"
+    },
+    {
+      "id": "act-1791700664591",
+      "timestamp": "2026-10-11T06:37:44.591Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users SDK Client",
+      "type": "CHANGED",
+      "badge": "breaking",
+      "message": "Users SDK upgraded v1 -> v2 (breaking change: name -> displayName)"
+    },
+    {
+      "id": "act-1791700658703",
+      "timestamp": "2026-10-11T06:37:38.703Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users SDK Client",
+      "type": "CHANGED",
+      "badge": "breaking",
+      "message": "Users SDK upgraded v1 -> v2 (breaking change: name -> displayName)"
+    },
+    {
+      "id": "act-1",
+      "serviceId": "stripe",
+      "serviceName": "Stripe API",
+      "type": "NORMAL",
+      "badge": "normal",
+      "message": "Stripe API - back to normal (Resolved automatically)",
+      "timeAgo": "1 hour ago",
+      "timestamp": "2026-10-11T05:37:26.573Z"
+    },
+    {
+      "id": "act-2",
+      "serviceId": "openai",
+      "serviceName": "OpenAI API",
+      "type": "HEALTHY",
+      "badge": "healthy",
+      "message": "OpenAI API - healthy (No issues)",
+      "timeAgo": "2 hours ago",
+      "timestamp": "2026-10-11T04:37:26.573Z"
+    }
+  ],
+  "nextIncidentNumber": 5,
+  "processedWebhookIds": [
+    "evt-sim-1791700668031-d27n0"
+  ],
+  "webhookEvents": [
+    {
+      "id": "wh-1791700668041-zqze",
+      "eventId": "evt-sim-1791700668031-d27n0",
+      "eventType": "dependency.changed",
+      "dependencyId": "weather",
+      "dependencyName": "Weather API",
+      "timestamp": "2026-10-11T06:37:48.031Z",
+      "receivedAt": "2026-10-11T06:37:48.041Z",
+      "result": "Incident created: INC-003 (6 change(s))",
+      "incidentId": "INC-003",
+      "simulated": true,
+      "hasSignature": true
+    }
+  ],
+  "sdkScenario": {
+    "version": "v1",
+    "activeClient": "UserClientV1",
+    "installedSdk": "1.2.0",
+    "adapterActive": false,
+    "history": []
+  }
+}

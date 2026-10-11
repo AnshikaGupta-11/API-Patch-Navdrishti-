@@ -1,0 +1,75 @@
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let apis=[
+{name:'Payment API',url:'/api/v1/payments',env:'Production',status:'Down',uptime:'98.2%',latency:'—',checked:'2 min ago'},
+{name:'User API',url:'/api/v1/users',env:'Production',status:'Warning',uptime:'99.1%',latency:'310 ms',checked:'12 min ago'},
+{name:'Product API',url:'/api/v1/products',env:'Production',status:'Healthy',uptime:'100%',latency:'142 ms',checked:'1 hour ago'},
+{name:'Notification API',url:'/api/v1/notifications',env:'Staging',status:'Healthy',uptime:'99.8%',latency:'190 ms',checked:'2 hours ago'},
+{name:'Order API',url:'/api/v1/orders',env:'Production',status:'Healthy',uptime:'100%',latency:'205 ms',checked:'3 hours ago'}
+];
+const changes=[
+{api:'Payment API',kind:'Response change',detail:'New field detected: payment_status',time:'2 minutes ago',level:'Critical',status:'Down'},
+{api:'User API',kind:'Schema change',detail:'Field middle_name was removed',time:'12 minutes ago',level:'Moderate',status:'Warning'}
+];
+let settings={email:true,auto:true,breaking:false};
+function button(label,action,cls='primary'){return `<button class="button ${cls}" data-action="${action}">${label}</button>`}
+function status(s){return `<span class="status ${s.toLowerCase()}">${s}</span>`}
+function tableRows(rows){return rows.map(a=>`<tr data-search="${(a.name+' '+a.url+' '+a.env+' '+a.status).toLowerCase()}"><td><strong>${esc(a.name)}</strong></td><td class="endpoint">${esc(a.url)}</td><td>${status(a.status)}</td><td>${a.uptime}</td><td>${a.latency}</td><td>${a.checked}</td><td><button class="text-button" data-action="inspect" data-name="${esc(a.name)}">Details ↗</button></td></tr>`).join('')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function panel(title,sub,body,extra=''){return `<article class="panel"><div class="section-head"><div><h2>${title}</h2><p>${sub}</p></div>${extra}</div>${body}</article>`}
+function render(page='Dashboard'){
+ $$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#crumb').textContent=page;$('#heading').textContent=page;
+ const pageIcons={'Dashboard':'📊','API Monitoring':'📡','Change Detection':'🧩','Impact Analysis':'🎯','Smart Repair':'🛠️','Validation & Recovery':'🛡️','Settings':'⚙️'};
+ $('#heading').innerHTML=`<span class="title-icon title-icon-page">${pageIcons[page]||'✨'}</span>${page}`;
+ const subtitles={'Dashboard':'A concise overview of your API environment.','API Monitoring':'Manage endpoints and inspect their current health.','Change Detection':'Review API contract changes and decide what needs attention.','Impact Analysis':'Trace potential downstream impact before a change reaches production.','Smart Repair':'Review suggested code adjustments before making changes.','Validation & Recovery':'Run validation checks and review recovery readiness.','Settings':'Configure workspace preferences and monitoring behavior.'};
+ $('#subtitle').textContent=subtitles[page]||'';$('#notice').classList.remove('show');
+ $('#headAction').innerHTML=page==='API Monitoring'?button('＋ Connect API','connect'):page==='Dashboard'?'<span class="date">SAT, OCT 10, 2026</span>':'';
+ const v=$('#view');
+ if(page==='Dashboard')v.innerHTML=`
+ <div class="grid">
+ ${stat('APIs monitored',apis.length,'⌘','Across all environments')}
+ ${stat('Healthy endpoints',apis.filter(a=>a.status==='Healthy').length,'✓','Responding within expected range')}
+ ${stat('Open changes',changes.length,'⌁','Require review')}
+ ${stat('Average latency','212 ms','◷','Illustrative sample metric')}</div>
+ <div class="overview-grid">
+ ${panel('API health','Current status by endpoint',`<div class="barlist">${[['Healthy',apis.filter(a=>a.status==='Healthy').length,'#91b69a'],['Warning',apis.filter(a=>a.status==='Warning').length,'#d5b27b'],['Down',apis.filter(a=>a.status==='Down').length,'#d58c86']].map(([n,x,c])=>`<div class="barrow"><span>${n}</span><div class="track"><div class="fill" style="width:${100*x/Math.max(apis.length,1)}%;background:${c}"></div></div><strong>${x}</strong></div>`).join('')}</div>`)}
+ ${panel('Needs attention','Most recent detected changes',changes.map(c=>`<div class="activity"><div class="activity-icon">!</div><div><b>${c.api} · ${c.kind}</b><p>${c.detail}</p><small>${c.time} · ${c.level}</small></div></div>`).join('')+`<div style="margin-top:12px">${button('Review all changes','page:Change Detection','secondary')}</div>`)}
+ </div>
+ <div style="margin-top:14px">${panel('Recently checked APIs','A small snapshot. Open API Monitoring for the complete list.',`<div class="table-wrap"><table><thead><tr><th>API</th><th>Endpoint</th><th>Status</th><th>Uptime</th><th>Last checked</th></tr></thead><tbody>${apis.slice(0,3).map(a=>`<tr><td><strong>${esc(a.name)}</strong></td><td class="endpoint">${esc(a.url)}</td><td>${status(a.status)}</td><td>${a.uptime}</td><td>${a.checked}</td></tr>`).join('')}</tbody></table></div><div style="margin-top:13px">${button('Open API Monitoring →','page:API Monitoring','secondary')}</div>`)}</div>`;
+ else if(page==='API Monitoring')v.innerHTML=panel('Connected endpoints','Search, filter, and inspect APIs in your workspace.',`<div class="toolbar"><input class="field-search" id="localSearch" placeholder="Search API name or endpoint..."><select class="filter" id="statusFilter"><option value="">All statuses</option><option>Healthy</option><option>Warning</option><option>Down</option></select></div><div class="table-wrap"><table><thead><tr><th>API name</th><th>Endpoint</th><th>Status</th><th>Uptime</th><th>Latency</th><th>Last checked</th><th></th></tr></thead><tbody id="apiRows">${tableRows(apis)}</tbody></table></div>`);
+ else if(page==='Change Detection')v.innerHTML=panel('Detected changes',`${changes.length} changes found in the current demo dataset.`,`${changes.map((c,i)=>`<div class="change-row"><div class="change-mark">⌁</div><div><b>${c.api} · ${c.kind}</b><p>${c.detail}</p><small>${c.time} · ${c.level} severity</small><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${button('View impact','impact:'+i,'secondary')}${button('Mark reviewed','review:'+i,'secondary')}</div></div><span class="tag">${c.level}</span></div>`).join('')}`);
+ else if(page==='Impact Analysis')v.innerHTML=`<div class="grid three">${[['Potentially affected APIs','2','Based on detected schema changes'],['Breaking changes','1','Review before release'],['Dependent services','4','Illustrative dependency estimate']].map(x=>`<article class="panel"><div class="muted">${x[0]}</div><div class="impact-number">${x[1]}</div><div class="muted">${x[2]}</div></article>`).join('')}</div><div style="margin-top:14px">${panel('Impact assessment','Potential downstream effects for current changes.',`<div class="impact-line"><span><b>Payment API</b><br><span class="muted">New payment_status response field</span></span><span class="status down">High priority</span></div><div class="impact-line"><span><b>Checkout service</b><br><span class="muted">May rely on previous payment response shape</span></span><span class="status warning">Review</span></div><div class="impact-line"><span><b>User profile consumer</b><br><span class="muted">middle_name field removed from schema</span></span><span class="status warning">Review</span></div><p class="muted" style="margin-top:14px">Impact results are illustrative until a real dependency graph and API schemas are connected.</p>`)}</div>`;
+ else if(page==='Smart Repair')v.innerHTML=`<div class="grid two">${panel('Suggested fix · Payment API','Review a safe fallback for the new response field.',`<div class="repair-box"><span class="tag">PROPOSED CHANGE</span><p>Use a default value if <code>payment_status</code> is missing so older responses remain compatible.</p><pre class="code">const status = response.payment_status ?? 'pending';</pre><div style="display:flex;gap:8px;flex-wrap:wrap">${button('Copy suggestion','copy','secondary')}${button('Send to validation','page:Validation & Recovery')}</div></div>`)}${panel('Repair workflow','Suggestions do not change production automatically.',`<div class="impact-line"><span><b>1. Review diff</b><br><span class="muted">Inspect the proposed code change</span></span><span class="status healthy">Ready</span></div><div class="impact-line"><span><b>2. Validate tests</b><br><span class="muted">Run against a staging environment</span></span><span class="status warning">Pending</span></div><div class="impact-line"><span><b>3. Deploy manually</b><br><span class="muted">Approve through your own release process</span></span><span class="status warning">Not started</span></div>`)}</div>`;
+ else if(page==='Validation & Recovery')v.innerHTML=`<div class="grid three">${[['Contract validation','Not run','Compare actual responses with the API schema'],['Smoke tests','Not run','Check core endpoint availability'],['Recovery plan','Needs setup','Document rollback and recovery steps']].map(x=>`<article class="panel"><div class="stat-top">${x[0]}<span class="stat-icon">✓</span></div><div class="impact-number" style="font-size:19px">${x[1]}</div><p class="muted">${x[2]}</p>${button('Run demo check','validate','secondary')}</article>`).join('')}</div><div style="margin-top:14px">${panel('Validation history','Results from actions performed in this browser session.',`<div id="validationHistory" class="empty">No validation checks have been run yet.</div>`)}</div>`;
+ else v.innerHTML=`
+ ${panel('Color theme','Choose an accent color for the clean white interface.',`<div class="theme-options">
+ ${[['sage','Sage Green','#73976d','#edf4e9','#ffffff','Soft and calm'],['violet','Electric Violet','#8d70dc','#f0ebff','#ffffff','Creative and premium'],['cyan','Bright Cyan','#00a9c7','#e6faff','#ffffff','Clean and techy'],['amber','Amber Gold','#c88719','#fff5df','#ffffff','Warm and bold'],['green','Mint Green','#269b68','#e7f8ef','#ffffff','Fresh and vivid'],['rose','Rose Pink','#d94f89','#fff0f6','#ffffff','Bright and modern']].map(t=>`<button class="theme-choice ${document.body.dataset.theme===t[0]?'selected':''}" data-action="theme:${t[0]}"><div class="swatches"><span class="swatch" style="background:${t[2]}"></span><span class="swatch" style="background:${t[3]}"></span><span class="swatch" style="background:${t[4]}"></span></div><b>${t[1]}</b><small>${t[5]}</small></button>`).join('')}
+ </div><p class="muted" style="margin-top:14px">Select any palette to preview it across the whole website.</p>`)}
+ <div style="margin-top:14px">${panel('Workspace preferences','These settings are interactive in this local demo.',Object.entries({email:['Email change notifications','Show notifications for detected API changes.'],auto:['Scheduled monitoring','Enable scheduled health checks (demo toggle only).'],breaking:['Strict breaking-change alerts','Flag schema removals as high priority.']}).map(([k,x])=>`<div class="setting-row"><div><b>${x[0]}</b><p>${x[1]}</p></div><button class="toggle ${settings[k]?'on':''}" data-action="toggle:${k}" aria-label="Toggle ${x[0]}"></button></div>`).join('')+`<p class="muted" style="margin-top:16px">Preferences are not persisted after reloading this page.</p>`)}</div>`;
+ const titleIcons=['📈','🚦','🔍','⚡','🧠','🧰','🧪','🛡️','🧭','✨'];
+ $$('#view h2').forEach((h,i)=>{if(!h.querySelector('.title-icon'))h.innerHTML=`<span class="title-icon title-icon-panel icon-color-${i%6}">${titleIcons[i%titleIcons.length]}</span>${h.innerHTML}`});
+ bindView();
+}
+function stat(name,val,icon,note){return `<article class="panel stat"><div class="stat-top">${name}<span class="stat-icon">${icon}</span></div><div class="stat-num">${val}</div><div class="stat-note">${note}</div></article>`}
+function notify(s){const n=$('#notice');n.textContent=s;n.classList.add('show');clearTimeout(window.nt);window.nt=setTimeout(()=>n.classList.remove('show'),4000)}
+function openModal(){ $('#overlay').classList.add('open');setTimeout(()=>$('#apiForm input').focus(),50)}
+function closeModal(){$('#overlay').classList.remove('open')}
+$$('.nav').forEach(b=>b.addEventListener('click',()=>{$('#sidebar').classList.remove('open');render(b.dataset.page)}));
+$('#mobile').onclick=()=>$('#sidebar').classList.toggle('open');$('#notifications').onclick=()=>notify('You have 2 changes waiting for review.');$('#close').onclick=closeModal;$('#cancel').onclick=closeModal;$('#overlay').onclick=e=>{if(e.target.id==='overlay')closeModal()};
+$('#apiForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);const url=new URL(f.get('url'));apis.unshift({name:f.get('name'),url:url.pathname||url.hostname,env:f.get('env'),status:'Healthy',uptime:'—',latency:'—',checked:'Just now'});closeModal();e.target.reset();render('API Monitoring');notify('API added to this local preview. Live monitoring requires a backend connection.')};
+function bindView(){
+ const ls=$('#localSearch'),sf=$('#statusFilter');function filter(){const q=(ls?.value||'').toLowerCase(),st=sf?.value||'';$$('#apiRows tr').forEach(r=>r.hidden=!(r.dataset.search.includes(q)&&(!st||r.children[2].textContent.trim()===st)))}
+ ls?.addEventListener('input',filter);sf?.addEventListener('change',filter);
+}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action;
+ if(a==='connect'){openModal();return}if(a.startsWith('page:')){render(a.slice(5));return}
+ if(a.startsWith('inspect')){const api=apis.find(x=>x.name===b.dataset.name);if(api)notify(`${api.name}: ${api.status} · ${api.url} · ${api.uptime} uptime (sample data).`);return}
+ if(a.startsWith('impact:')){render('Impact Analysis');return}
+ if(a.startsWith('review:')){const i=+a.split(':')[1];changes.splice(i,1);render('Change Detection');notify('Change marked reviewed in this page session.');return}
+ if(a==='copy'){try{await navigator.clipboard.writeText("const status = response.payment_status ?? 'pending';");notify('Suggested code copied.')}catch{notify("Copy this: const status = response.payment_status ?? 'pending';")}return}
+ if(a==='validate'){const h=$('#validationHistory');if(h)h.innerHTML='<div class="activity"><div class="activity-icon">✓</div><div><b>Demo validation completed</b><p>UI action succeeded. No real endpoint was called.</p><small>Just now · Sample result</small></div></div>';notify('Demo check complete. Connect a backend to validate real endpoints.');return}
+ if(a.startsWith('theme:')){const t=a.split(':')[1];document.body.dataset.theme=t;render('Settings');notify('Color theme changed to '+t+'.');return}
+ if(a.startsWith('toggle:')){const k=a.split(':')[1];settings[k]=!settings[k];b.classList.toggle('on',settings[k]);notify('Preference updated for this page session.')}
+});
+$('#search').addEventListener('input',e=>{const q=e.target.value.toLowerCase();if(q){if(!$('#apiRows'))render('API Monitoring');setTimeout(()=>{const ls=$('#localSearch');if(ls){ls.value=q;ls.dispatchEvent(new Event('input'))}},0)}});
+$('#headAction').addEventListener('click',e=>{if(e.target.closest('[data-action="connect"]'))openModal()});
+render();

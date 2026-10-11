@@ -1,0 +1,14 @@
+{
+  "name": "api-guardian-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API Patch - Keep software working when APIs change",
+  "scripts": {
+    "start:backend": "node api-guardian-backend/src/server.js",
+    "start:frontend": "npm --prefix \"API_Patch_Navy_White_Theme (2)/API_Patch_Navy_White_Theme\" run dev",
+    "build:frontend": "npm --prefix \"API_Patch_Navy_White_Theme (2)/API_Patch_Navy_White_Theme\" run build",
+    "test:backend": "npm --prefix api-guardian-backend test",
+    "test:frontend": "npm --prefix \"API_Patch_Navy_White_Theme (2)/API_Patch_Navy_White_Theme\" test",
+    "test": "npm run test:backend && npm run test:frontend"
+  }
+}

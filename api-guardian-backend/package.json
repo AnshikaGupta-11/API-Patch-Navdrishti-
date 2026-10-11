@@ -1,0 +1,19 @@
+{
+  "name": "api-guardian-backend",
+  "version": "1.0.0",
+  "description": "Hackathon MVP backend for detecting API contract changes, analysing impact, proposing compatibility repairs, and validating workflows.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
