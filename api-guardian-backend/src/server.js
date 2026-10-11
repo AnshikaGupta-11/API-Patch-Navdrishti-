@@ -95,17 +95,24 @@ app.get("/api/dashboard", (_req, res) => {
 // ----------------------------------------------------------------------
 
 app.get("/api/services", (_req, res) => {
+  const unresolvedIncidents = store.state.incidents.filter(
+    (i) => !["VALIDATED", "RESOLVED", "CLOSED"].includes(i.status)
+  );
+  const unresolvedServiceIds = new Set(unresolvedIncidents.map((i) => i.serviceId));
   res.json({
-    services: Object.values(store.state.services).map((service) => ({
-      id: service.id,
-      name: service.name,
-      endpoint: service.endpoint || `/api/${service.id}`,
-      status: service.status,
-      changed: service.changed,
-      uptime: service.uptime || "99.8%",
-      responseTimeMs: service.responseTimeMs || 220,
-      lastObservedAt: service.lastObservedAt
-    }))
+    services: Object.values(store.state.services).map((service) => {
+      const isChanged = (service.changed || unresolvedServiceIds.has(service.id)) && service.status !== "HEALTHY";
+      return {
+        id: service.id,
+        name: service.name,
+        endpoint: service.endpoint || `/api/${service.id}`,
+        status: isChanged ? "DEGRADED" : "HEALTHY",
+        changed: isChanged,
+        uptime: service.uptime || "99.8%",
+        responseTimeMs: service.responseTimeMs || 220,
+        lastObservedAt: service.lastObservedAt
+      };
+    })
   });
 });
 
@@ -359,6 +366,10 @@ app.post("/api/incidents/:id/apply-fix", (req, res) => {
       400,
       'Explicit approval required: send { "approved": true }'
     );
+  }
+
+  if (!incident.repairProposal) {
+    return sendError(res, 400, "Create a repair proposal first before applying fix");
   }
 
   incident.repairProposal.approved = true;

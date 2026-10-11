@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from './context/AppContext';
+import { getCurrentLocalDate } from './utils/time';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Toast from './components/layout/Toast';
@@ -89,7 +90,7 @@ export default function App() {
               <span>API Patch • Keep software working when APIs change</span>
             </div>
             <div className="text-slate-400">
-              Demo sandbox prepared for hackathon presentation • Sat, Oct 10, 2026
+              Demo sandbox prepared for hackathon presentation • {getCurrentLocalDate()}
             </div>
           </footer>
         </div>

@@ -93,7 +93,7 @@ export default function ValidationRecoveryPage() {
 
             return (
               <div
-                key={test.id}
+                key={test.id || (`vt-${idx}`)}
                 className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between gap-4 transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ export default function ValidationRecoveryPage() {
         </div>
       </div>
 
-      {/* Card 2: Issue Resolved or Rollback State */}
+      {/* Card 2: Resolution Status or Recovery State */}
       {repairState === 'rolled_back' ? (
         <div className="bg-amber-50/60 rounded-2xl border border-amber-200/90 shadow-card p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
@@ -157,7 +157,7 @@ export default function ValidationRecoveryPage() {
             </button>
           </div>
         </div>
-      ) : (
+      ) : repairState === 'applied' && isAllPassed ? (
         <div className="bg-emerald-50/40 rounded-2xl border border-emerald-200/90 shadow-card p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             <div className="w-11 h-11 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0 shadow-sm">
@@ -189,6 +189,57 @@ export default function ValidationRecoveryPage() {
             >
               <RotateCcw className="w-3.5 h-3.5 text-slate-300" />
               Rollback (if needed)
+            </button>
+          </div>
+        </div>
+      ) : validationState === 'failed' ? (
+        <div className="bg-red-50/50 rounded-2xl border border-red-200/90 shadow-card p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-red-100 border border-red-200 flex items-center justify-center text-red-700 flex-shrink-0 shadow-sm">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Validation Failed: Regression Detected
+              </h3>
+              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                One or more validation checks failed against {selectedIncidentApi}. Inspect the failure details or adjust the adapter code.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
+            <button
+              onClick={runValidationTests}
+              className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Re-run Suite
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-blue-50/40 rounded-2xl border border-blue-200/80 shadow-card p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center text-[#405CFF] flex-shrink-0 shadow-sm">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Validation Suite Staged
+              </h3>
+              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                {repairState === 'ready' 
+                  ? `AI patch generated for ${selectedIncidentApi}. Apply the fix in Smart Repair to execute automated live gateway validation.`
+                  : `Verification vectors ready. Run tests anytime to verify baseline schema compliance for ${selectedIncidentApi}.`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
+            <button
+              onClick={() => setActivePage('smart-repair')}
+              className="px-4 py-2 text-xs font-semibold text-white bg-[#1D3B70] hover:bg-[#152B52] rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
+            >
+              Go to Smart Repair →
             </button>
           </div>
         </div>

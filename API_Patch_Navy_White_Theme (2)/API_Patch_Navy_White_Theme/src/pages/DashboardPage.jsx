@@ -38,7 +38,10 @@ export default function DashboardPage() {
     selectedIncidentApi,
     setIsLogsModalOpen,
     backendConnected,
-    proxyResponse
+    proxyResponse,
+    apisWithChangesCount: ctxApisWithChanges,
+    healthyApisCount: ctxHealthyApis,
+    totalApisCount: ctxTotalApis
   } = useApp();
 
   const [showCharts, setShowCharts] = useState(true);
@@ -49,9 +52,11 @@ export default function DashboardPage() {
     api.endpoint.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalApisCount = apis.length;
-  const apisWithChangesCount = apis.filter(a => a.status === 'Changed').length;
-  const healthyApisCount = apis.filter(a => a.status === 'Healthy').length;
+  const totalApisCount = ctxTotalApis ?? apis.length;
+  const apisWithChangesCount = ctxApisWithChanges ?? apis.filter(a => a.status === 'Changed').length;
+  const healthyApisCount = ctxHealthyApis ?? Math.max(0, totalApisCount - apisWithChangesCount);
+  const healthyPercent = totalApisCount > 0 ? ((healthyApisCount / totalApisCount) * 100).toFixed(1) : '100.0';
+  const changesPercent = totalApisCount > 0 ? ((apisWithChangesCount / totalApisCount) * 100).toFixed(1) : '0.0';
   
   // Calculate avg response time
   const avgResponseTime = Math.round(
@@ -199,10 +204,10 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 tracking-tight">{apisWithChangesCount || 2}</span>
+            <span className="text-2xl font-extrabold text-slate-900 tracking-tight">{apisWithChangesCount}</span>
           </div>
-          <p className="text-[11px] text-red-600 font-medium mt-1.5">
-            Requires attention
+          <p className={`text-[11px] font-medium mt-1.5 ${apisWithChangesCount > 0 ? 'text-red-600' : 'text-slate-400'}`}>
+            {apisWithChangesCount > 0 ? 'Requires attention' : 'All systems normal'}
           </p>
         </div>
 
@@ -218,7 +223,7 @@ export default function DashboardPage() {
             <span className="text-2xl font-extrabold text-slate-900 tracking-tight">{healthyApisCount}</span>
           </div>
           <p className="text-[11px] text-blue-600 font-medium mt-1.5">
-            {((healthyApisCount / totalApisCount) * 100).toFixed(1)}% uptime
+            {healthyPercent}% uptime
           </p>
         </div>
 
@@ -320,9 +325,9 @@ export default function DashboardPage() {
           </div>
 
           <div className="p-5 space-y-4 flex-1 overflow-y-auto">
-            {activities.map((item) => (
+            {activities.map((item, idx) => (
               <div 
-                key={item.id} 
+                key={item.id || `act-${idx}`} 
                 onClick={() => {
                   if (item.type === 'changed') setActivePage('change-detection');
                 }}
@@ -423,14 +428,14 @@ export default function DashboardPage() {
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   Healthy APIs
                 </span>
-                <span className="font-semibold text-slate-800">{healthyApisCount} (83.3%)</span>
+                <span className="font-semibold text-slate-800">{healthyApisCount} ({healthyPercent}%)</span>
               </div>
               <div className="flex items-center justify-between text-slate-600">
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                   Requires Attention
                 </span>
-                <span className="font-semibold text-slate-800">{apisWithChangesCount} (16.7%)</span>
+                <span className="font-semibold text-slate-800">{apisWithChangesCount} ({changesPercent}%)</span>
               </div>
             </div>
           </div>

@@ -27,13 +27,21 @@ export default function SmartRepairPage() {
     addToast, 
     setActivePage,
     selectedIncidentApi,
-    setSelectedIncidentApi
+    setSelectedIncidentApi,
+    apis = []
   } = useApp();
 
   const [copied, setCopied] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const activeRepair = (smartRepairDataMap && smartRepairDataMap[selectedIncidentApi]) || smartRepairData;
+
+  const availableIncidentApis = ['Weather API', 'User API'];
+  apis.filter(a => a.status === 'Changed').forEach(a => {
+    if (!availableIncidentApis.includes(a.name)) {
+      availableIncidentApis.push(a.name);
+    }
+  });
 
   const handleCopyFix = () => {
     navigator.clipboard.writeText(activeRepair.rawFixCode);
@@ -66,27 +74,27 @@ export default function SmartRepairPage() {
 
         <div className="flex items-center gap-2">
           {/* Active Incident Toggle */}
-          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-subtle">
-            <button
-              onClick={() => setSelectedIncidentApi('Weather API')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                selectedIncidentApi !== 'User API'
-                  ? 'bg-[#1D3B70] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Weather API
-            </button>
-            <button
-              onClick={() => setSelectedIncidentApi('User API')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                selectedIncidentApi === 'User API'
-                  ? 'bg-[#1D3B70] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              User API
-            </button>
+          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-subtle overflow-x-auto">
+            {availableIncidentApis.map((apiName) => {
+              const isSelected = selectedIncidentApi === apiName;
+              const isDegraded = apis.some(a => a.name === apiName && a.status === 'Changed');
+              return (
+                <button
+                  key={apiName}
+                  onClick={() => setSelectedIncidentApi(apiName)}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-[#1D3B70] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {isDegraded && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-amber-300' : 'bg-red-500'}`}></span>
+                  )}
+                  {apiName}
+                </button>
+              );
+            })}
           </div>
 
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-violet-50 text-[#6555FF] border border-violet-200 shadow-sm">
@@ -137,22 +145,23 @@ export default function SmartRepairPage() {
             {/* Code lines matching diff */}
             <div className="space-y-1 text-slate-300 leading-relaxed pr-24">
               {activeRepair.diffLines.map((line, idx) => {
+                const lineKey = `diff-${idx}-${line.type}-${line.text?.substring(0, 12)}`;
                 if (line.type === 'removed') {
                   return (
-                    <div key={idx} className="text-red-400 font-semibold bg-red-500/10 px-2 py-0.5 rounded -mx-2">
+                    <div key={lineKey} className="text-red-400 font-semibold bg-red-500/10 px-2 py-0.5 rounded -mx-2">
                       {line.text}
                     </div>
                   );
                 }
                 if (line.type === 'added') {
                   return (
-                    <div key={idx} className="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded -mx-2">
+                    <div key={lineKey} className="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded -mx-2">
                       {line.text}
                     </div>
                   );
                 }
                 return (
-                  <div key={idx} className="text-slate-400">
+                  <div key={lineKey} className="text-slate-400">
                     {line.text}
                   </div>
                 );
@@ -222,7 +231,7 @@ export default function SmartRepairPage() {
             <div>
               <h3 className="text-base font-bold text-slate-900">Apply Simulated AI Fix?</h3>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                This will execute the simulated AST transform on the Weather API client adapter, updating dependent frontend & backend microservices to support both <code className="bg-slate-100 text-indigo-700 font-mono px-1 rounded">temperature</code> and legacy fields.
+                This will execute the simulated AST transform on the <strong>{activeRepair.apiName || selectedIncidentApi}</strong> client adapter, updating dependent frontend & backend microservices to support both modified and baseline schema contracts.
               </p>
             </div>
             <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-500 space-y-1">

@@ -407,7 +407,7 @@ class Store {
 
   logActivity(entry) {
     const activityItem = {
-      id: `act-${Date.now()}`,
+      id: `act-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
       timeAgo: "Just now",
       ...entry

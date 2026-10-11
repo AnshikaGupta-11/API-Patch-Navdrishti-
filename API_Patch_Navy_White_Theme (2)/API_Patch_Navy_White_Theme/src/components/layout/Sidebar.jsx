@@ -13,7 +13,7 @@ import {
 import { useApp } from '../../context/AppContext';
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
-  const { activePage, setActivePage } = useApp();
+  const { activePage, setActivePage, unresolvedCount = 0 } = useApp();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -81,8 +81,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
                 {item.id === 'change-detection' && (
-                  <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
-                    2
+                  <span className={`ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full border ${
+                    unresolvedCount > 0 
+                      ? 'bg-red-500/20 text-red-400 border-red-500/30' 
+                      : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                  }`}>
+                    {unresolvedCount}
                   </span>
                 )}
               </button>

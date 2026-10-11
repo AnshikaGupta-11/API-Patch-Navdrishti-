@@ -90,8 +90,9 @@ export default function ManualReviewModal() {
                     bgStyle = 'bg-emerald-500/10 px-1 -mx-1 rounded';
                   }
 
+                  const lineKey = `m-diff-${idx}-${line.type}-${line.text?.substring(0, 10)}`;
                   return (
-                    <div key={idx} className={`${lineStyle} ${bgStyle}`}>
+                    <div key={lineKey} className={`${lineStyle} ${bgStyle}`}>
                       {line.text}
                     </div>
                   );
@@ -127,7 +128,7 @@ export default function ManualReviewModal() {
               </div>
               <div className="space-y-2">
                 {activeRepair.manualReviewNotes.map((note, i) => (
-                  <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
+                  <div key={`m-note-${i}-${note.substring(0, 12)}`} className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#405CFF] mt-1.5 flex-shrink-0"></span>
                     <span>{note}</span>
                   </div>

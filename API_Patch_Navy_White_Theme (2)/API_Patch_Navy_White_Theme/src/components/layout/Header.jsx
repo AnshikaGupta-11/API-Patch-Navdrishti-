@@ -3,9 +3,19 @@ import { Search, Bell, ChevronDown, Menu, CheckCircle2, AlertTriangle, ShieldChe
 import { useApp } from '../../context/AppContext';
 
 export default function Header({ setMobileOpen }) {
-  const { searchQuery, setSearchQuery, setActivePage, addToast, settings } = useApp();
+  const { searchQuery, setSearchQuery, setActivePage, addToast, settings, unresolvedCount = 0, changesData = [], apis = [] } = useApp();
   const [profileOpen, setProfileOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
+
+  const activeChanges = changesData.length > 0 
+    ? changesData 
+    : apis.filter(a => a.status === 'Changed').map(a => ({
+        serviceId: a.id,
+        serviceName: a.name,
+        endpoint: a.endpoint,
+        status: 'Breaking Change Detected',
+        changesDetected: [{ description: 'Schema difference detected' }]
+      }));
 
   return (
     <header className="h-16 bg-white border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-subtle">
@@ -52,38 +62,45 @@ export default function Header({ setMobileOpen }) {
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+            {unresolvedCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+            )}
           </button>
 
           {alertsOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-modal border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
               <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-800">Notifications</span>
-                <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium">2 Active</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                  unresolvedCount > 0 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  {unresolvedCount} Active
+                </span>
               </div>
               <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
-                <div 
-                  onClick={() => { setActivePage('change-detection'); setAlertsOpen(false); }}
-                  className="p-3 hover:bg-slate-50 cursor-pointer flex gap-3 items-start transition-colors"
-                >
-                  <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-medium text-slate-800">Weather API breaking change</p>
-                    <p className="text-[11px] text-slate-500">2 fields renamed in payload</p>
-                    <span className="text-[10px] text-slate-400 mt-1 block">5 mins ago</span>
+                {activeChanges.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-slate-500">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mb-1.5" />
+                    All monitored APIs are healthy (0 active breaking changes)
                   </div>
-                </div>
-                <div 
-                  onClick={() => { setActivePage('change-detection'); setAlertsOpen(false); }}
-                  className="p-3 hover:bg-slate-50 cursor-pointer flex gap-3 items-start transition-colors"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-medium text-slate-800">GitHub API header added</p>
-                    <p className="text-[11px] text-slate-500">x-github-api-version detected</p>
-                    <span className="text-[10px] text-slate-400 mt-1 block">12 mins ago</span>
-                  </div>
-                </div>
+                ) : (
+                  activeChanges.map((change, idx) => (
+                    <div 
+                      key={change.serviceId || change.incidentId || idx}
+                      onClick={() => { setActivePage('change-detection'); setAlertsOpen(false); }}
+                      className="p-3 hover:bg-slate-50 cursor-pointer flex gap-3 items-start transition-colors"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-medium text-slate-800">{change.serviceName || change.apiName} breaking change</p>
+                        <p className="text-[11px] text-slate-500">
+                          {change.changesDetected?.[0]?.description || change.changesDetected?.[0]?.message || 'Schema differences detected'}
+                        </p>
+                        <span className="text-[10px] text-slate-400 mt-1 block">Active Incident</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
               <div className="p-2 border-t border-slate-100 text-center">
                 <button 
