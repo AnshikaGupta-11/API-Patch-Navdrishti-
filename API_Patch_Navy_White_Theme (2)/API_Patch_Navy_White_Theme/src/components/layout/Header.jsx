@@ -17,6 +17,14 @@ export default function Header({ setMobileOpen }) {
         changesDetected: [{ description: 'Schema difference detected' }]
       }));
 
+  const userInitials = (settings?.userFullName || 'AP')
+    .trim()
+    .split(/\s+/)
+    .map(w => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'AP';
+
   return (
     <header className="h-16 bg-white border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-subtle">
       {/* Mobile Menu & Global Search */}
@@ -124,7 +132,7 @@ export default function Header({ setMobileOpen }) {
             className="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-full hover:bg-slate-100 transition-colors focus:outline-none"
           >
             <div className="w-8 h-8 rounded-full bg-[#0B172A] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-              CB
+              {userInitials}
             </div>
             <span className="text-xs font-medium text-slate-800 hidden sm:inline">
               {settings.userFullName}

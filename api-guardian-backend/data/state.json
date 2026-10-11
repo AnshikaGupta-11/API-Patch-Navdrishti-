@@ -10,7 +10,7 @@
       "changed": false,
       "uptime": "97.4%",
       "responseTimeMs": 240,
-      "lastObservedAt": "2026-10-11T18:42:48.096Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -40,7 +40,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 210,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -66,7 +66,7 @@
       "changed": false,
       "uptime": "99.8%",
       "responseTimeMs": 185,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -94,7 +94,7 @@
       "changed": false,
       "uptime": "99.8%",
       "responseTimeMs": 320,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -121,7 +121,7 @@
       "changed": true,
       "uptime": "99.7%",
       "responseTimeMs": 260,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "headers": {
@@ -150,7 +150,7 @@
       "changed": false,
       "uptime": "99.8%",
       "responseTimeMs": 220,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "responseTimeMs": 220,
@@ -176,7 +176,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 210,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -201,7 +201,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 140,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -228,7 +228,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 95,
-      "lastObservedAt": "2026-10-11T17:58:57.525Z",
+      "lastObservedAt": "2026-10-11T21:17:35.317Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -501,545 +501,11 @@
       ],
       "from": "temperature",
       "to": "temp",
-      "appliedAt": "2026-10-11T20:13:15.631Z",
+      "appliedAt": "2026-10-11T21:17:45.078Z",
       "enabled": true
     }
   },
   "incidents": [
-    {
-      "id": "INC-003",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "status": "VALIDATED",
-      "severity": "HIGH",
-      "changes": [
-        {
-          "kind": "MISSING_FIELD",
-          "path": "temp",
-          "severity": "BREAKING",
-          "expected": 24,
-          "renamedTo": "temperature",
-          "message": "Field \"temp\" renamed to \"temperature\""
-        },
-        {
-          "kind": "MISSING_FIELD",
-          "path": "city",
-          "severity": "BREAKING",
-          "expected": "Indore",
-          "renamedTo": "city_name",
-          "message": "Field \"city\" renamed to \"city_name\""
-        },
-        {
-          "kind": "ADDED_FIELD",
-          "path": "temperature",
-          "severity": "BREAKING",
-          "actual": 24,
-          "renamedFrom": "temp",
-          "message": "New field \"temperature\" replaces \"temp\""
-        },
-        {
-          "kind": "ADDED_FIELD",
-          "path": "city_name",
-          "severity": "BREAKING",
-          "actual": "Indore",
-          "renamedFrom": "city",
-          "message": "New field \"city_name\" replaces \"city\""
-        },
-        {
-          "kind": "FIELD_RENAMED",
-          "path": "temp",
-          "targetPath": "temperature",
-          "severity": "BREAKING",
-          "expected": "temp",
-          "actual": "temperature",
-          "rename": {
-            "from": "temp",
-            "to": "temperature"
-          },
-          "message": "Field \"temp\" renamed to \"temperature\""
-        },
-        {
-          "kind": "FIELD_RENAMED",
-          "path": "city",
-          "targetPath": "city_name",
-          "severity": "BREAKING",
-          "expected": "city",
-          "actual": "city_name",
-          "rename": {
-            "from": "city",
-            "to": "city_name"
-          },
-          "message": "Field \"city\" renamed to \"city_name\""
-        }
-      ],
-      "impact": {
-        "affectedWorkflows": [
-          "Weather Dashboard",
-          "Homepage",
-          "Notification Service",
-          "City Search",
-          "Mobile App"
-        ],
-        "affectedServicesAndPages": {
-          "totalAffected": 5,
-          "frontendPages": [
-            "Weather Dashboard",
-            "Homepage",
-            "City Search"
-          ],
-          "backendServices": [
-            "Notification Service"
-          ],
-          "externalIntegrations": [
-            "Mobile App"
-          ]
-        },
-        "impactSeverity": {
-          "high": 6,
-          "medium": 4,
-          "low": 0
-        },
-        "affectedEndpoints": [
-          {
-            "endpoint": "GET /weather/current",
-            "service": "Frontend",
-            "impact": "High",
-            "description": "Missing field: temp -> temperature"
-          },
-          {
-            "endpoint": "GET /notifications",
-            "service": "Backend",
-            "impact": "Medium",
-            "description": "Weather notification alerts"
-          },
-          {
-            "endpoint": "POST /weather/search",
-            "service": "Frontend",
-            "impact": "Medium",
-            "description": "Response format changed for city search"
-          },
-          {
-            "endpoint": "GET /mobile/sync",
-            "service": "External",
-            "impact": "High",
-            "description": "Mobile App location data binding"
-          },
-          {
-            "endpoint": "/api/weather/current",
-            "service": "Frontend",
-            "impact": "High",
-            "description": "New field \"temperature\" replaces \"temp\"",
-            "field": "temperature"
-          },
-          {
-            "endpoint": "/api/weather/current",
-            "service": "Frontend",
-            "impact": "High",
-            "description": "New field \"city_name\" replaces \"city\"",
-            "field": "city_name"
-          },
-          {
-            "endpoint": "GET /weather/current",
-            "service": "Frontend",
-            "impact": "High",
-            "description": "Missing field: temp -> temperature"
-          },
-          {
-            "endpoint": "GET /notifications",
-            "service": "Backend",
-            "impact": "Medium",
-            "description": "Weather notification alerts"
-          },
-          {
-            "endpoint": "POST /weather/search",
-            "service": "Frontend",
-            "impact": "Medium",
-            "description": "Response format changed for city search"
-          },
-          {
-            "endpoint": "GET /mobile/sync",
-            "service": "External",
-            "impact": "High",
-            "description": "Mobile App location data binding"
-          }
-        ],
-        "details": [
-          {
-            "field": "temp",
-            "changeKind": "MISSING_FIELD",
-            "severity": "BREAKING",
-            "workflows": [
-              "Weather Dashboard",
-              "Homepage",
-              "Notification Service"
-            ]
-          },
-          {
-            "field": "city",
-            "changeKind": "MISSING_FIELD",
-            "severity": "BREAKING",
-            "workflows": [
-              "City Search",
-              "Weather Dashboard",
-              "Mobile App"
-            ]
-          },
-          {
-            "field": "temperature",
-            "changeKind": "ADDED_FIELD",
-            "severity": "BREAKING",
-            "workflows": []
-          },
-          {
-            "field": "city_name",
-            "changeKind": "ADDED_FIELD",
-            "severity": "BREAKING",
-            "workflows": []
-          },
-          {
-            "field": "temp",
-            "changeKind": "FIELD_RENAMED",
-            "severity": "BREAKING",
-            "workflows": [
-              "Weather Dashboard",
-              "Homepage",
-              "Notification Service"
-            ]
-          },
-          {
-            "field": "city",
-            "changeKind": "FIELD_RENAMED",
-            "severity": "BREAKING",
-            "workflows": [
-              "City Search",
-              "Weather Dashboard",
-              "Mobile App"
-            ]
-          }
-        ],
-        "totalAffectedWorkflows": 5,
-        "note": "Impact is calculated from the registered dependency architecture graph."
-      },
-      "source": "webhook",
-      "repairProposal": {
-        "id": "PROP-1791748176923",
-        "type": "FIELD_MAPPING",
-        "serviceId": "weather",
-        "mapping": {
-          "from": "temperature",
-          "to": "temp"
-        },
-        "mappings": [
-          {
-            "from": "temperature",
-            "to": "temp"
-          },
-          {
-            "from": "city_name",
-            "to": "city"
-          }
-        ],
-        "diff": "Update your code to use the new field names:\n-   temp: data.temp,\n-   city: data.city\n+\n+   temperature: data.temperature,\n+   city_name: data.city_name",
-        "adapterCode": "// Compatibility Adapter for Weather API\nfunction adapt(data) {\n  if (data.temperature !== undefined) {\n    data.temp = data.temperature;\n    delete data.temperature;\n  }\n  if (data.city_name !== undefined) {\n    data.city = data.city_name;\n    delete data.city_name;\n  }\n  return data;\n}",
-        "rationale": "Upstream Weather API renamed \"temp\" to \"temperature\" and \"city\" to \"city_name\". Adapter maps new response fields back to original contract keys.",
-        "risk": "LOW",
-        "requiresHumanApproval": true,
-        "approved": true,
-        "suggestedAction": "Apply Automatically with explicit approval",
-        "approvedAt": "2026-10-11T20:13:15.631Z",
-        "approvedBy": "Chinmay Bulani",
-        "rejectedAt": "2026-10-11T19:50:38.652Z",
-        "rejectionReason": "Rejected by engineer for manual review"
-      },
-      "validation": {
-        "passed": true,
-        "status": "PASSED",
-        "ranAt": "2026-10-11T20:13:15.641Z",
-        "checks": [
-          {
-            "name": "http_status_matches",
-            "category": "API Response Structure",
-            "expected": 200,
-            "actual": 200,
-            "passed": true,
-            "message": "HTTP status 200 matches baseline"
-          },
-          {
-            "name": "required_field:temp",
-            "category": "Data Integrity",
-            "expected": "present",
-            "actual": "present",
-            "passed": true
-          },
-          {
-            "name": "required_field:condition",
-            "category": "Data Integrity",
-            "expected": "present",
-            "actual": "present",
-            "passed": true
-          },
-          {
-            "name": "required_field:humidity",
-            "category": "Data Integrity",
-            "expected": "present",
-            "actual": "present",
-            "passed": true
-          },
-          {
-            "name": "required_field:city",
-            "category": "Data Integrity",
-            "expected": "present",
-            "actual": "present",
-            "passed": true
-          },
-          {
-            "name": "temp_value_preserved",
-            "category": "Data Integrity",
-            "expected": 24,
-            "actual": 24,
-            "passed": true
-          },
-          {
-            "name": "dependent_services_compatibility",
-            "category": "Dependent Services",
-            "expected": "contracts_satisfied",
-            "actual": "contracts_satisfied",
-            "passed": true
-          },
-          {
-            "name": "frontend_pages_operability",
-            "category": "Frontend Functionality",
-            "expected": "all_views_healthy",
-            "actual": "all_views_healthy",
-            "passed": true
-          },
-          {
-            "name": "adapter_performance_overhead",
-            "category": "Performance Check",
-            "expected": "< 50ms overhead",
-            "actual": "1ms",
-            "passed": true
-          },
-          {
-            "name": "no_contract_differences",
-            "category": "Contract Compliance",
-            "expected": 0,
-            "actual": 0,
-            "passed": true
-          }
-        ],
-        "summary": {
-          "totalChecks": 10,
-          "passedChecks": 10,
-          "failedChecks": 0
-        },
-        "normalizedResponse": {
-          "statusCode": 200,
-          "body": {
-            "condition": "Sunny",
-            "humidity": 45,
-            "temp": 24,
-            "city": "Indore"
-          }
-        },
-        "remainingChanges": [],
-        "logs": [
-          "[2026-10-11T20:13:15.641Z] Initiating regression validation for service \"Weather API\" (weather)",
-          "Validation finished. Status: PASSED"
-        ]
-      },
-      "createdAt": "2026-10-11T18:42:48.104Z",
-      "updatedAt": "2026-10-11T20:13:15.641Z",
-      "history": [
-        {
-          "status": "DETECTED",
-          "timestamp": "2026-10-11T18:42:48.104Z",
-          "message": "Webhook event 'dependency.changed' (evt-sim-1791744168045-274a6) triggered detection: 6 difference(s)"
-        },
-        {
-          "status": "REPAIR_PROPOSED",
-          "timestamp": "2026-10-11T19:49:36.923Z",
-          "message": "Repair proposal generated (FIELD_MAPPING). Awaiting explicit human approval."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T19:49:36.941Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T19:49:36.954Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T19:49:50.230Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T19:49:50.243Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "MANUAL_REVIEW_REQUIRED",
-          "timestamp": "2026-10-11T19:50:38.652Z",
-          "message": "Rejected by engineer for manual review"
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T19:50:44.762Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T19:50:44.774Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "ROLLED_BACK",
-          "timestamp": "2026-10-11T19:51:01.717Z",
-          "message": "Adapter rolled back to previous state"
-        },
-        {
-          "status": "VALIDATION_FAILED",
-          "timestamp": "2026-10-11T19:52:58.137Z",
-          "message": "Regression tests failed."
-        },
-        {
-          "status": "VALIDATION_FAILED",
-          "timestamp": "2026-10-11T20:03:57.616Z",
-          "message": "Regression tests failed."
-        },
-        {
-          "status": "VALIDATION_FAILED",
-          "timestamp": "2026-10-11T20:04:00.209Z",
-          "message": "Regression tests failed."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:04:13.281Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:04:13.290Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "ROLLED_BACK",
-          "timestamp": "2026-10-11T20:04:27.609Z",
-          "message": "Adapter rolled back to previous state"
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:04:37.118Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:04:37.128Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:04:55.158Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:04:55.167Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "ROLLED_BACK",
-          "timestamp": "2026-10-11T20:05:02.253Z",
-          "message": "Adapter rolled back to previous state"
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:05:09.755Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:05:09.767Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:08:32.688Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:08:32.718Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:08:45.324Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:08:45.334Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:09:05.733Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:09:17.600Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:09:17.612Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:10:33.775Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:10:33.785Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:13:04.320Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:13:04.330Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "ROLLED_BACK",
-          "timestamp": "2026-10-11T20:13:08.788Z",
-          "message": "Adapter rolled back to previous state"
-        },
-        {
-          "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T20:13:15.631Z",
-          "message": "Approved compatibility adapter applied by Chinmay Bulani"
-        },
-        {
-          "status": "VALIDATED",
-          "timestamp": "2026-10-11T20:13:15.641Z",
-          "message": "All 5 regression validation test suites passed. Incident resolved."
-        }
-      ],
-      "resolved": true,
-      "resolvedAt": "2026-10-11T20:13:15.641Z"
-    },
     {
       "id": "INC-002",
       "serviceId": "github",
@@ -1090,12 +556,12 @@
       },
       "repairProposal": null,
       "validation": null,
-      "createdAt": "2026-10-11T17:58:57.525Z",
-      "updatedAt": "2026-10-11T17:58:57.525Z",
+      "createdAt": "2026-10-11T21:17:35.317Z",
+      "updatedAt": "2026-10-11T21:17:35.317Z",
       "history": [
         {
           "status": "DETECTED",
-          "timestamp": "2026-10-11T17:58:57.525Z",
+          "timestamp": "2026-10-11T21:17:35.317Z",
           "message": "Detected 1 contract difference(s) on GitHub API"
         }
       ]
@@ -1315,7 +781,7 @@
         "note": "Impact is calculated from the registered dependency architecture graph."
       },
       "repairProposal": {
-        "id": "PROP-1791741537564",
+        "id": "PROP-1791753465069",
         "type": "FIELD_MAPPING",
         "serviceId": "weather",
         "mapping": {
@@ -1339,13 +805,13 @@
         "requiresHumanApproval": true,
         "approved": true,
         "suggestedAction": "Apply Automatically with explicit approval",
-        "approvedAt": "2026-10-11T17:58:57.712Z",
-        "approvedBy": "Security Lead"
+        "approvedAt": "2026-10-11T21:17:45.078Z",
+        "approvedBy": "Chinmay Bulani"
       },
       "validation": {
         "passed": true,
         "status": "PASSED",
-        "ranAt": "2026-10-11T17:58:57.723Z",
+        "ranAt": "2026-10-11T21:17:45.088Z",
         "checks": [
           {
             "name": "http_status_matches",
@@ -1435,47 +901,42 @@
         },
         "remainingChanges": [],
         "logs": [
-          "[2026-10-11T17:58:57.723Z] Initiating regression validation for service \"Weather API\" (weather)",
+          "[2026-10-11T21:17:45.088Z] Initiating regression validation for service \"Weather API\" (weather)",
           "Validation finished. Status: PASSED"
         ]
       },
-      "createdAt": "2026-10-11T17:58:57.525Z",
-      "updatedAt": "2026-10-11T19:49:36.954Z",
+      "createdAt": "2026-10-11T21:17:35.317Z",
+      "updatedAt": "2026-10-11T21:17:45.088Z",
       "history": [
         {
           "status": "DETECTED",
-          "timestamp": "2026-10-11T17:58:57.525Z",
+          "timestamp": "2026-10-11T21:17:35.317Z",
           "message": "Detected 6 contract difference(s) on Weather API"
         },
         {
           "status": "REPAIR_PROPOSED",
-          "timestamp": "2026-10-11T17:58:57.564Z",
+          "timestamp": "2026-10-11T21:17:45.069Z",
           "message": "Repair proposal generated (FIELD_MAPPING). Awaiting explicit human approval."
         },
         {
           "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T17:58:57.712Z",
-          "message": "Approved compatibility adapter applied by Security Lead"
+          "timestamp": "2026-10-11T21:17:45.078Z",
+          "message": "Approved compatibility adapter applied by Chinmay Bulani"
         },
         {
           "status": "VALIDATED",
-          "timestamp": "2026-10-11T17:58:57.724Z",
+          "timestamp": "2026-10-11T21:17:45.088Z",
           "message": "All 5 regression validation test suites passed. Incident resolved."
-        },
-        {
-          "status": "ROLLED_BACK",
-          "timestamp": "2026-10-11T17:58:57.735Z",
-          "message": "Adapter rolled back to previous state"
         }
       ],
       "resolved": true,
-      "resolvedAt": "2026-10-11T17:58:57.724Z"
+      "resolvedAt": "2026-10-11T21:17:45.088Z"
     }
   ],
   "recentActivity": [
     {
-      "id": "act-1791749595641-3wtoel",
-      "timestamp": "2026-10-11T20:13:15.641Z",
+      "id": "act-1791753465088-locrmu",
+      "timestamp": "2026-10-11T21:17:45.088Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
@@ -1484,8 +945,8 @@
       "message": "Weather API - issue resolved and validated"
     },
     {
-      "id": "act-1791749595631-mf3hur",
-      "timestamp": "2026-10-11T20:13:15.631Z",
+      "id": "act-1791753465078-wtfa9b",
+      "timestamp": "2026-10-11T21:17:45.078Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
@@ -1494,255 +955,59 @@
       "message": "Compatibility adapter applied for Weather API"
     },
     {
-      "id": "act-1791749588788-b005a4",
-      "timestamp": "2026-10-11T20:13:08.788Z",
+      "id": "act-1791753455317-n6taow",
+      "timestamp": "2026-10-11T21:17:35.317Z",
+      "timeAgo": "Just now",
+      "serviceId": "github",
+      "serviceName": "GitHub API",
+      "type": "CHANGED",
+      "badge": "changed",
+      "message": "GitHub API contract change detected (1 change(s))"
+    },
+    {
+      "id": "act-1791753455317-vystsi",
+      "timestamp": "2026-10-11T21:17:35.317Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
       "type": "CHANGED",
-      "badge": "rollback",
-      "message": "Adapter rolled back for Weather API"
+      "badge": "breaking",
+      "message": "Weather API contract change detected (6 change(s))"
     },
     {
-      "id": "act-1791749584330-oey9pf",
-      "timestamp": "2026-10-11T20:13:04.330Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749584320-rltpx0",
-      "timestamp": "2026-10-11T20:13:04.320Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749433785-zz0v8z",
-      "timestamp": "2026-10-11T20:10:33.785Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749433775-5vx4mo",
-      "timestamp": "2026-10-11T20:10:33.775Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749357612-ptgz8l",
-      "timestamp": "2026-10-11T20:09:17.612Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749357600-tm4ndg",
-      "timestamp": "2026-10-11T20:09:17.600Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749345733-dpxuyc",
-      "timestamp": "2026-10-11T20:09:05.733Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749325334-csdurs",
-      "timestamp": "2026-10-11T20:08:45.334Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749325324-j1bppz",
-      "timestamp": "2026-10-11T20:08:45.324Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749312718-t4gz25",
-      "timestamp": "2026-10-11T20:08:32.718Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749312688-j3topm",
-      "timestamp": "2026-10-11T20:08:32.688Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749109767-6dq7hc",
-      "timestamp": "2026-10-11T20:05:09.767Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749109755-tu9k7p",
-      "timestamp": "2026-10-11T20:05:09.755Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749102253-kgqc6j",
-      "timestamp": "2026-10-11T20:05:02.253Z",
+      "id": "act-1791753455304-d4zlw2",
+      "timestamp": "2026-10-11T21:17:35.304Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
       "type": "CHANGED",
-      "badge": "rollback",
-      "message": "Adapter rolled back for Weather API"
+      "badge": "changed",
+      "message": "Weather API response changed (2 fields modified: temp -> temperature, city -> city_name)"
     },
     {
-      "id": "act-1791749095167-w0rx3r",
-      "timestamp": "2026-10-11T20:04:55.167Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
+      "id": "act-1",
+      "serviceId": "stripe",
+      "serviceName": "Stripe API",
+      "type": "NORMAL",
+      "badge": "normal",
+      "message": "Stripe API - back to normal (Resolved automatically)",
+      "timeAgo": "1 hour ago",
+      "timestamp": "2026-10-11T20:17:28.740Z"
     },
     {
-      "id": "act-1791749095158-2wp740",
-      "timestamp": "2026-10-11T20:04:55.158Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749077128-qby4ex",
-      "timestamp": "2026-10-11T20:04:37.128Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749077118-yxcltq",
-      "timestamp": "2026-10-11T20:04:37.118Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791749067609-m9yeiz",
-      "timestamp": "2026-10-11T20:04:27.609Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "CHANGED",
-      "badge": "rollback",
-      "message": "Adapter rolled back for Weather API"
-    },
-    {
-      "id": "act-1791749053290-zlluh6",
-      "timestamp": "2026-10-11T20:04:13.290Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "resolved",
-      "message": "Weather API - issue resolved and validated"
-    },
-    {
-      "id": "act-1791749053281-21iiff",
-      "timestamp": "2026-10-11T20:04:13.281Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "RESOLVED",
-      "badge": "repaired",
-      "message": "Compatibility adapter applied for Weather API"
-    },
-    {
-      "id": "act-1791748261717-elqbzk",
-      "timestamp": "2026-10-11T19:51:01.718Z",
-      "timeAgo": "Just now",
-      "serviceId": "weather",
-      "serviceName": "Weather API",
-      "type": "CHANGED",
-      "badge": "rollback",
-      "message": "Adapter rolled back for Weather API"
+      "id": "act-2",
+      "serviceId": "openai",
+      "serviceName": "OpenAI API",
+      "type": "HEALTHY",
+      "badge": "healthy",
+      "message": "OpenAI API - healthy (No issues)",
+      "timeAgo": "2 hours ago",
+      "timestamp": "2026-10-11T19:17:28.740Z"
     }
   ],
-  "nextIncidentNumber": 4,
-  "processedWebhookIds": [
-    "evt-sim-1791744168045-274a6"
-  ],
-  "webhookEvents": [
-    {
-      "id": "wh-1791744168104-b6w0",
-      "eventId": "evt-sim-1791744168045-274a6",
-      "eventType": "dependency.changed",
-      "dependencyId": "weather",
-      "dependencyName": "Weather API",
-      "timestamp": "2026-10-11T18:42:48.046Z",
-      "receivedAt": "2026-10-11T18:42:48.104Z",
-      "result": "Incident created: INC-003 (6 change(s))",
-      "incidentId": "INC-003",
-      "simulated": true,
-      "hasSignature": true
-    }
-  ],
+  "nextIncidentNumber": 3,
+  "processedWebhookIds": [],
+  "webhookEvents": [],
   "sdkScenario": {
     "version": "v1",
     "activeClient": "UserClientV1",

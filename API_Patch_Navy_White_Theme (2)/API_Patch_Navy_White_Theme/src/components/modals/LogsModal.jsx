@@ -3,23 +3,30 @@ import { X, Terminal, CheckCircle2, Copy, Check, Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export default function LogsModal() {
-  const { isLogsModalOpen, setIsLogsModalOpen, addToast } = useApp();
+  const { isLogsModalOpen, setIsLogsModalOpen, addToast, selectedIncidentApi } = useApp();
   const [copied, setCopied] = useState(false);
 
   if (!isLogsModalOpen) return null;
 
-  const logs = `[2026-10-10 10:24:01.002] INFO  [suite:runner] Initializing autonomous API validation suite...
-[2026-10-10 10:24:01.045] INFO  [test:schema] Checking contract for GET https://api.weather.com/v1/current
-[2026-10-10 10:24:01.088] PASS  [test:schema] Key assertion satisfied: 'temperature' [Float64] (value: 24)
-[2026-10-10 10:24:01.089] PASS  [test:schema] Key assertion satisfied: 'city_name' [String] (value: 'Indore')
-[2026-10-10 10:24:01.120] PASS  [test:integrity] Strict schema validator passed (0 errors, 0 deprecations)
-[2026-10-10 10:24:01.230] INFO  [test:downstream] Pinging dependent consumer: WeatherDashboard (Frontend)
-[2026-10-10 10:24:01.278] PASS  [test:downstream] WeatherDashboard rendered 100% components without null pointer
-[2026-10-10 10:24:01.310] INFO  [test:downstream] Pinging dependent consumer: NotificationWorker (Backend)
-[2026-10-10 10:24:01.350] PASS  [test:downstream] NotificationWorker parsed condition payloads successfully
-[2026-10-10 10:24:01.425] PASS  [test:e2e] End-to-end integration pipeline validated across 3 microservices
-[2026-10-10 10:24:01.499] PASS  [test:perf] Benchmark 100 iterations: p50=210ms, p95=248ms, p99=272ms (<300ms SLA)
-[2026-10-10 10:24:01.500] SUCCESS [suite:complete] 5/5 validation suites passed. System status: STABLE.`;
+  const serviceName = selectedIncidentApi || 'Weather API';
+  const isUser = serviceName.toLowerCase().includes('user');
+  const endpointUrl = isUser ? 'https://api.internal.org/v1/users/1' : 'https://api.weather.com/v1/current';
+  const keyField = isUser ? 'name' : 'temperature';
+  const keyValue = isUser ? "'Rahul' [String]" : '24 [Float64]';
+  const consumer1 = isUser ? 'UserProfile (Frontend)' : 'WeatherDashboard (Frontend)';
+  const consumer2 = isUser ? 'GreetingService (Backend)' : 'NotificationWorker (Backend)';
+
+  const logs = `[${new Date().toISOString()}] INFO  [suite:runner] Initializing autonomous API validation suite...
+[${new Date().toISOString()}] INFO  [test:schema] Checking contract for GET ${endpointUrl}
+[${new Date().toISOString()}] PASS  [test:schema] Key assertion satisfied: '${keyField}' (${keyValue})
+[${new Date().toISOString()}] PASS  [test:integrity] Strict schema validator passed (0 errors, 0 deprecations)
+[${new Date().toISOString()}] INFO  [test:downstream] Pinging dependent consumer: ${consumer1}
+[${new Date().toISOString()}] PASS  [test:downstream] ${consumer1} rendered 100% components without null pointer
+[${new Date().toISOString()}] INFO  [test:downstream] Pinging dependent consumer: ${consumer2}
+[${new Date().toISOString()}] PASS  [test:downstream] ${consumer2} parsed response payloads successfully
+[${new Date().toISOString()}] PASS  [test:e2e] End-to-end integration pipeline validated across 3 microservices
+[${new Date().toISOString()}] PASS  [test:perf] Benchmark 100 iterations: p50=14ms, p95=28ms, p99=42ms (<50ms SLA)
+[${new Date().toISOString()}] SUCCESS [suite:complete] 5/5 validation suites passed. System status: STABLE.`;
 
   const handleCopyLogs = () => {
     navigator.clipboard.writeText(logs);
@@ -29,7 +36,10 @@ export default function LogsModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150"
+      onClick={() => setIsLogsModalOpen(false)}
+    >
       <div 
         className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden transform animate-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}

@@ -165,11 +165,23 @@ export function AppProvider({ children }) {
     fetchBackendData();
   }, []);
 
+  // Resolve service key and display name for multi-dependency support
+  const resolveServiceKeyAndName = (input = selectedIncidentApi) => {
+    const raw = String(input || '').toLowerCase();
+    if (raw.includes('user')) return { serviceKey: 'users', displayName: 'User API', isUser: true };
+    if (raw.includes('weather')) return { serviceKey: 'weather', displayName: 'Weather API', isUser: false };
+    if (raw.includes('stripe')) return { serviceKey: 'stripe', displayName: 'Stripe API', isUser: false };
+    if (raw.includes('inventory')) return { serviceKey: 'inventory-mcp', displayName: 'Inventory MCP Service', isUser: false };
+    if (raw.includes('webhook')) return { serviceKey: 'webhook-events', displayName: 'Partner Webhook Source', isUser: false };
+    if (raw.includes('product')) return { serviceKey: 'products', displayName: 'Products API', isUser: false };
+    if (raw.includes('payment')) return { serviceKey: 'payments', displayName: 'Payments API', isUser: false };
+    if (raw.includes('github')) return { serviceKey: 'github', displayName: 'GitHub API', isUser: false };
+    return { serviceKey: raw || 'weather', displayName: input || 'Weather API', isUser: false };
+  };
+
   // Trigger Incident: Sends change to backend and runs monitoring pipeline
   const triggerIncident = async (targetService = selectedIncidentApi) => {
-    const isUser = targetService.toLowerCase().includes('user');
-    const serviceKey = isUser ? 'users' : 'weather';
-    const serviceDisplayName = isUser ? 'User API' : 'Weather API';
+    const { serviceKey, displayName: serviceDisplayName, isUser } = resolveServiceKeyAndName(targetService);
 
     setSelectedIncidentApi(serviceDisplayName);
 
@@ -180,7 +192,7 @@ export function AppProvider({ children }) {
       await fetchBackendData();
 
       setApis(prev => prev.map(a => {
-        if ((serviceKey === 'weather' && a.name === 'Weather API') || (serviceKey === 'users' && a.name === 'User API')) {
+        if ((serviceKey === 'weather' && a.name === 'Weather API') || (serviceKey === 'users' && a.name === 'User API') || a.id === serviceKey || a.name === serviceDisplayName) {
           return {
             ...a,
             status: 'Changed',
@@ -304,8 +316,7 @@ export function AppProvider({ children }) {
     setIsApplyingFix(true);
     addToast(`Applying autonomous fix for ${targetApi} to adapter layer...`, 'info', 'AI Repair in Progress');
 
-    const isUser = targetApi.toLowerCase().includes('user');
-    const serviceKey = isUser ? 'users' : 'weather';
+    const { serviceKey, displayName, isUser } = resolveServiceKeyAndName(targetApi);
 
     if (!backendConnected) {
       // Clean local sandbox mode
@@ -452,8 +463,7 @@ export function AppProvider({ children }) {
   // Reject Fix simulation (Human-in-the-loop)
   const rejectFix = async (targetApi = selectedIncidentApi) => {
     try {
-      const isUser = targetApi.toLowerCase().includes('user');
-      const serviceKey = isUser ? 'users' : 'weather';
+      const { serviceKey } = resolveServiceKeyAndName(targetApi);
       const incRes = await apiClient.getIncidents(`serviceId=${serviceKey}`);
       const incident = incRes.incidents?.[0];
       if (incident) {
@@ -483,8 +493,7 @@ export function AppProvider({ children }) {
   // Rollback simulation
   const rollbackFix = async (targetApi = selectedIncidentApi) => {
     try {
-      const isUser = targetApi.toLowerCase().includes('user');
-      const serviceKey = isUser ? 'users' : 'weather';
+      const { serviceKey } = resolveServiceKeyAndName(targetApi);
       const incRes = await apiClient.getIncidents(`serviceId=${serviceKey}`);
       const incident = incRes.incidents?.[0];
       if (incident) {
@@ -499,13 +508,15 @@ export function AppProvider({ children }) {
 
     setRepairState('rolled_back');
     setValidationState('idle');
+    const { serviceKey: targetKey, displayName: targetDisplayName } = resolveServiceKeyAndName(targetApi);
     setApis(prev => prev.map(api => {
-      if (api.name === targetApi || (targetApi.includes('Weather') && api.name === 'Weather API') || (targetApi.includes('User') && api.name === 'User API')) {
+      const { serviceKey: currentKey, displayName: currentDisplayName } = resolveServiceKeyAndName(api.name || api.id);
+      if (api.name === targetApi || currentDisplayName === targetDisplayName || currentKey === targetKey) {
         return {
           ...api,
           status: 'Changed',
-          responseTime: api.name === 'User API' ? '310 ms' : '480 ms',
-          uptime: api.name === 'User API' ? '99.1%' : '97.4%',
+          responseTime: targetKey === 'users' ? '310 ms' : '480 ms',
+          uptime: targetKey === 'users' ? '99.1%' : '97.4%',
           hasBreakingChange: true
         };
       }
@@ -536,8 +547,7 @@ export function AppProvider({ children }) {
     addToast('Executing validation suite across 5 verification vectors...', 'info', 'Validation Running');
 
     try {
-      const isUser = selectedIncidentApi.toLowerCase().includes('user');
-      const serviceKey = isUser ? 'users' : 'weather';
+      const { serviceKey } = resolveServiceKeyAndName(selectedIncidentApi);
       const incRes = await apiClient.getIncidents(`serviceId=${serviceKey}`);
       const incident = incRes.incidents?.[0];
 

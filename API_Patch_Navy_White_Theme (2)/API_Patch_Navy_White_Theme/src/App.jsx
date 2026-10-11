@@ -77,7 +77,7 @@ export default function App() {
           <Header setMobileOpen={setMobileOpen} />
 
           {/* Page Content Canvas */}
-          <main className="flex-1 p-4 sm:p-7 max-w-[1536px] w-full mx-auto">
+          <main className="flex-1 p-4 sm:p-7 pb-24 sm:pb-28 max-w-[1536px] w-full mx-auto">
             <ErrorBoundary onReset={() => setActivePage('dashboard')}>
               {renderActivePage()}
             </ErrorBoundary>

@@ -358,9 +358,12 @@ export default function ImpactAnalysisPage() {
 
       {/* Selected Endpoint Drawer / Slide-Over Modal */}
       {selectedEndpointDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setSelectedEndpointDetail(null)}
+        >
           <div 
-            className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform animate-in zoom-in-95 duration-150"
+            className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">

@@ -25,6 +25,7 @@ import {
 } from 'recharts';
 import { useApp } from '../context/AppContext';
 import { uptimeSeriesData } from '../data/mockData';
+import { getCurrentLocalDate, getCurrentLocalTime } from '../utils/time';
 
 export default function DashboardPage() {
   const { 
@@ -39,6 +40,7 @@ export default function DashboardPage() {
     setIsLogsModalOpen,
     backendConnected,
     proxyResponse,
+    settings,
     apisWithChangesCount: ctxApisWithChanges,
     healthyApisCount: ctxHealthyApis,
     totalApisCount: ctxTotalApis
@@ -70,6 +72,10 @@ export default function DashboardPage() {
     { name: 'Down', value: 0, color: '#F59E0B' }
   ];
 
+  const currentHour = new Date().getHours();
+  const greetingTime = currentHour < 12 ? 'Good Morning' : currentHour < 18 ? 'Good Afternoon' : 'Good Evening';
+  const firstName = settings?.userFullName ? settings.userFullName.split(' ')[0] : 'Engineer';
+
   return (
     <div className="space-y-6">
       {/* Top Banner / Greeting */}
@@ -77,7 +83,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              Good Morning, Chinmay <span className="inline-block animate-pulse">👋</span>
+              {greetingTime}, {firstName} <span className="inline-block animate-pulse">👋</span>
             </h2>
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
               backendConnected
@@ -94,8 +100,8 @@ export default function DashboardPage() {
         </div>
 
         <div className="text-right sm:self-center">
-          <span className="text-xs font-semibold text-slate-700 block">Oct 11, 2026</span>
-          <span className="text-[11px] text-slate-400 block font-mono">10:45 AM EST</span>
+          <span className="text-xs font-semibold text-slate-700 block">{getCurrentLocalDate()}</span>
+          <span className="text-[11px] text-slate-400 block font-mono">{getCurrentLocalTime()}</span>
         </div>
       </div>
 
