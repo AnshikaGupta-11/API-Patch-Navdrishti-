@@ -7,10 +7,12 @@ const API_BASE = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://lo
 
 async function request(path, options = {}) {
   const url = `${API_BASE}${path}`;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('api_guardian_token') : null;
   const config = {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {})
     }
   };
@@ -27,6 +29,7 @@ async function request(path, options = {}) {
       }
       const error = new Error(errMessage);
       error.status = res.status;
+      error.data = errorData;
       throw error;
     }
     return await res.json();
@@ -38,6 +41,28 @@ async function request(path, options = {}) {
 
 export const apiClient = {
   baseUrl: API_BASE,
+
+  // 0. Authentication (Persistent SQLite Backend)
+  register: ({ email, password, name }) =>
+    request('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name })
+    }),
+  signup: ({ email, password, name }) =>
+    request('/api/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name })
+    }),
+  login: ({ email, password }) =>
+    request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    }),
+  getMe: () => request('/api/auth/me'),
+  logout: () =>
+    request('/api/auth/logout', {
+      method: 'POST'
+    }),
 
   // 1. Health & Dashboard
   getHealth: () => request('/api/health'),
@@ -62,6 +87,18 @@ export const apiClient = {
   getIncidents: (params = '') => request(`/api/incidents${params ? `?${params}` : ''}`),
   getIncident: (id) => request(`/api/incidents/${id}`),
   getIncidentImpact: (id) => request(`/api/incidents/${id}/impact`),
+  getServiceImpact: async (serviceId) => {
+    try {
+      const incRes = await request(`/api/incidents?serviceId=${serviceId}`);
+      const incident = incRes?.incidents?.[0];
+      if (incident?.id) {
+        return await request(`/api/incidents/${incident.id}/impact`);
+      }
+    } catch {
+      // fallback
+    }
+    return null;
+  },
 
   // 5. Safe Repair Proposals & Approval
   proposeFix: (incidentId) => request(`/api/incidents/${incidentId}/propose-fix`, { method: 'POST' }),
@@ -78,7 +115,16 @@ export const apiClient = {
   rollback: (incidentId) => request(`/api/incidents/${incidentId}/rollback`, { method: 'POST' }),
 
   // 6. Regression Testing & Validation
-  validateIncident: (incidentId) => request(`/api/incidents/${incidentId}/validate`, { method: 'POST' }),
+  validateIncident: async (incidentId) => {
+    try {
+      return await request(`/api/incidents/${incidentId}/validate`, { method: 'POST' });
+    } catch (err) {
+      if (err.status === 422 && err.data?.validation) {
+        return err.data;
+      }
+      throw err;
+    }
+  },
 
   // 7. Proxy Gateway Verification
   getProxy: (serviceId) => request(`/api/proxy/${serviceId}`),

@@ -26,8 +26,32 @@ export default function ValidationRecoveryPage() {
     isApplyingFix
   } = useApp();
 
-  const isAllPassed = validationState === 'passed';
-  const isRunning = validationState === 'running';
+  const isRunning =
+    validationState === 'running' ||
+    (Array.isArray(validationTests) && validationTests.some(t => t?.status === 'Running...'));
+
+  const hasTests = Array.isArray(validationTests) && validationTests.length > 0;
+  const allTestsPass = hasTests && validationTests.every(t => t?.status === 'Passed');
+  const hasFailedTests = hasTests && validationTests.some(t => t?.status === 'Failed' || t?.status === 'Error');
+
+  // True if tests have completed and all verification checks passed
+  const isAllPassed = 
+    !isRunning && 
+    !hasFailedTests && 
+    hasTests && 
+    (validationState === 'passed' || (repairState === 'applied' && allTestsPass));
+
+  const proxyEndpointPath = (() => {
+    const raw = String(selectedIncidentApi || '').toLowerCase();
+    if (raw.includes('user')) return 'users';
+    if (raw.includes('weather')) return 'weather';
+    if (raw.includes('product')) return 'products';
+    if (raw.includes('payment')) return 'payments';
+    if (raw.includes('github')) return 'github';
+    if (raw.includes('stripe')) return 'stripe';
+    if (raw.includes('inventory')) return 'inventory-mcp';
+    return 'weather';
+  })();
 
   return (
     <div className="space-y-6">
@@ -48,6 +72,8 @@ export default function ValidationRecoveryPage() {
               ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
               : isRunning
               ? 'bg-blue-50 text-blue-600 border border-blue-200'
+              : validationState === 'failed' || hasFailedTests
+              ? 'bg-red-50 text-red-600 border border-red-200'
               : 'bg-amber-50 text-amber-600 border border-amber-200'
           }`}>
             {isRunning ? (
@@ -59,6 +85,11 @@ export default function ValidationRecoveryPage() {
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                 All Tests Passed
+              </>
+            ) : validationState === 'failed' || hasFailedTests ? (
+              <>
+                <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                Validation Failed
               </>
             ) : (
               <>
@@ -87,48 +118,61 @@ export default function ValidationRecoveryPage() {
         </div>
 
         <div className="space-y-2.5">
-          {(validationTests || []).map((test, idx) => {
-            const passed = test?.status === 'Passed';
-            const running = test?.status === 'Running...';
+          {!hasTests ? (
+            <div className="p-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center">
+              <p className="text-xs text-slate-500">No validation tests available. Run validation suite to execute test vectors.</p>
+            </div>
+          ) : (
+            (validationTests || []).map((test, idx) => {
+              const passed = test?.status === 'Passed';
+              const running = test?.status === 'Running...';
+              const failed = test?.status === 'Failed' || test?.status === 'Error';
 
-            return (
-              <div
-                key={test.id || (`vt-${idx}`)}
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between gap-4 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    {running ? (
-                      <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
-                    ) : (
-                      <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                    )}
+              return (
+                <div
+                  key={test.id || (`vt-${idx}`)}
+                  className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between gap-4 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      failed ? 'bg-red-100 text-red-600' : running ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'
+                    }`}>
+                      {running ? (
+                        <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                      ) : failed ? (
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-600 stroke-[2.5]" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-slate-800 block">
+                        {test.name}
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-normal block sm:hidden">
+                        {test.details}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-slate-800 block">
-                      {test.name}
+
+                  <div className="flex items-center gap-4">
+                    <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+                      {test.duration}
                     </span>
-                    <span className="text-[11px] text-slate-400 font-normal block sm:hidden">
-                      {test.details}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                      passed
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                        : failed
+                        ? 'bg-red-50 text-red-600 border border-red-200'
+                        : 'bg-blue-50 text-blue-600 border border-blue-200'
+                    }`}>
+                      {test.status}
                     </span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
-                    {test.duration}
-                  </span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                    passed
-                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                      : 'bg-blue-50 text-blue-600 border border-blue-200'
-                  }`}>
-                    {test.status}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -256,7 +300,7 @@ export default function ValidationRecoveryPage() {
               </h3>
             </div>
             <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
-              GET /api/proxy/{selectedIncidentApi?.toLowerCase().includes('user') ? 'users' : 'weather'}
+              GET /api/proxy/{proxyEndpointPath}
             </span>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed">

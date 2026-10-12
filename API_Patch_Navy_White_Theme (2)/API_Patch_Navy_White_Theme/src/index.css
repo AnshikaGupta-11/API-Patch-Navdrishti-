@@ -51,3 +51,68 @@
 .pulse-dot {
   animation: pulse-subtle 2s infinite ease-in-out;
 }
+
+/* SVG Dependency Graph Flow Lines */
+@keyframes flowLineAnim {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.graph-flow-line {
+  stroke-dasharray: 6 6;
+  animation: flowLineAnim 1.4s linear infinite;
+}
+
+.graph-flow-line-broken {
+  stroke-dasharray: 6 6;
+  animation: flowLineAnim 0.9s linear infinite;
+}
+
+/* Radar Scan Line for Analysis Sequence */
+@keyframes radarScan {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0.2;
+  }
+}
+
+.animate-radar-scan {
+  animation: radarScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Node Glow Pulse */
+@keyframes nodeAlertGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+}
+
+.node-alert-glow {
+  animation: nodeAlertGlow 2.4s infinite ease-out;
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .graph-flow-line,
+  .graph-flow-line-broken,
+  .animate-radar-scan,
+  .node-alert-glow,
+  .pulse-dot {
+    animation: none !important;
+  }
+}
+

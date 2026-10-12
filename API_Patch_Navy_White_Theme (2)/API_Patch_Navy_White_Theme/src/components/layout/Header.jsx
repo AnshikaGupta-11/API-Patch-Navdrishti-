@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
-import { Search, Bell, ChevronDown, Menu, CheckCircle2, AlertTriangle, ShieldCheck, User, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { Search, Bell, ChevronDown, Menu, CheckCircle2, AlertTriangle, ShieldCheck, User, LogOut, LogIn, Settings as SettingsIcon } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export default function Header({ setMobileOpen }) {
-  const { searchQuery, setSearchQuery, setActivePage, addToast, settings, unresolvedCount = 0, changesData = [], apis = [] } = useApp();
+  const { 
+    searchQuery, 
+    setSearchQuery, 
+    setActivePage, 
+    addToast, 
+    settings, 
+    unresolvedCount = 0, 
+    changesData = [], 
+    apis = [],
+    currentUser,
+    logoutUser
+  } = useApp();
   const [profileOpen, setProfileOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
 
@@ -17,7 +28,10 @@ export default function Header({ setMobileOpen }) {
         changesDetected: [{ description: 'Schema difference detected' }]
       }));
 
-  const userInitials = (settings?.userFullName || 'AP')
+  const displayName = currentUser?.name || settings?.userFullName || 'Guest Engineer';
+  const displayEmail = currentUser?.email || settings?.userEmail || 'sandbox@internet-after-api.dev';
+
+  const userInitials = displayName
     .trim()
     .split(/\s+/)
     .map(w => w[0])
@@ -135,19 +149,23 @@ export default function Header({ setMobileOpen }) {
               {userInitials}
             </div>
             <span className="text-xs font-medium text-slate-800 hidden sm:inline">
-              {settings.userFullName}
+              {displayName}
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-modal border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-modal border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
               <div className="px-4 py-2.5 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-800">{settings.userFullName}</p>
-                <p className="text-[11px] text-slate-500 truncate">{settings.userEmail}</p>
-                <span className="inline-block mt-1 text-[10px] font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
-                  {settings.userRole}
-                </span>
+                <p className="text-xs font-semibold text-slate-800">{displayName}</p>
+                <p className="text-[11px] text-slate-500 truncate">{displayEmail}</p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded ${
+                    currentUser ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-50 text-indigo-700'
+                  }`}>
+                    {currentUser ? 'Active Session (SQLite)' : settings.userRole}
+                  </span>
+                </div>
               </div>
               <div className="py-1">
                 <button
@@ -169,16 +187,29 @@ export default function Header({ setMobileOpen }) {
                 </button>
               </div>
               <div className="border-t border-slate-100 pt-1">
-                <button
-                  onClick={() => {
-                    addToast('Session locked. Re-authenticate via SSO to resume.', 'warning');
-                    setProfileOpen(false);
-                  }}
-                  className="w-full px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2.5 text-left"
-                >
-                  <LogOut className="w-3.5 h-3.5 text-red-500" />
-                  Lock / Sign Out
-                </button>
+                {currentUser ? (
+                  <button
+                    onClick={() => {
+                      setProfileOpen(false);
+                      logoutUser();
+                    }}
+                    className="w-full px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2.5 text-left"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-red-500" />
+                    Sign Out
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setProfileOpen(false);
+                      setActivePage('login');
+                    }}
+                    className="w-full px-4 py-2 text-xs text-[#405CFF] hover:bg-slate-50 flex items-center gap-2.5 text-left font-medium"
+                  >
+                    <LogIn className="w-3.5 h-3.5 text-[#405CFF]" />
+                    Sign In / Register
+                  </button>
+                )}
               </div>
             </div>
           )}

@@ -9,7 +9,8 @@ import {
   ChevronDown, 
   Radio,
   FileCode,
-  CheckCircle2
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { apiClient } from '../../api/client';
@@ -24,16 +25,24 @@ export default function DemoToolbar() {
     setActivePage,
     triggerSimulatedWebhook,
     setSelectedIncidentApi,
-    addToast
+    addToast,
+    isSimulating,
+    SIMULATABLE_SERVICES = []
   } = useApp();
 
   const [expanded, setExpanded] = useState(false);
+  const [selectedSimService, setSelectedSimService] = useState('auto');
 
   const handleAutoHeal = () => {
+    let target = null;
+    if (selectedSimService && selectedSimService !== 'auto') {
+      const match = SIMULATABLE_SERVICES.find(s => s.id === selectedSimService);
+      if (match) target = match.name;
+    }
     setActivePage('smart-repair');
     setTimeout(() => {
-      applyFix();
-    }, 400);
+      applyFix(target);
+    }, 200);
   };
 
   const handleWebhookSim = async () => {
@@ -83,13 +92,34 @@ export default function DemoToolbar() {
         {/* Expanded Quick Action Buttons */}
         {expanded && (
           <div className="flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-100 pl-1 border-l border-slate-700/60">
-            <button
-              onClick={() => triggerIncident('Weather API')}
-              className="px-2.5 py-1.5 rounded-lg bg-red-600/90 hover:bg-red-500 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-colors"
-              title="Simulate incoming schema breaking change on Weather API"
+            {/* Service Selector Dropdown */}
+            <select
+              value={selectedSimService}
+              onChange={(e) => setSelectedSimService(e.target.value)}
+              disabled={isSimulating}
+              className="bg-[#13284A] text-slate-200 border border-slate-700/80 rounded-lg text-[11px] px-2 py-1 outline-none focus:ring-1 focus:ring-[#405CFF] disabled:opacity-50 cursor-pointer"
+              title="Select target API dependency or auto-rotate across healthy services"
             >
-              <Zap className="w-3 h-3 fill-current" />
-              <span>Simulate Incident</span>
+              <option value="auto">Auto-Rotate (Next Healthy)</option>
+              {SIMULATABLE_SERVICES.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => triggerIncident(selectedSimService)}
+              disabled={isSimulating}
+              className="px-2.5 py-1.5 rounded-lg bg-red-600/90 hover:bg-red-500 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
+              title="Simulate incoming schema breaking change on selected dependency"
+            >
+              {isSimulating ? (
+                <RefreshCw className="w-3 h-3 animate-spin" />
+              ) : (
+                <Zap className="w-3 h-3 fill-current" />
+              )}
+              <span>{isSimulating ? 'Simulating...' : 'Simulate Change'}</span>
             </button>
 
             <button

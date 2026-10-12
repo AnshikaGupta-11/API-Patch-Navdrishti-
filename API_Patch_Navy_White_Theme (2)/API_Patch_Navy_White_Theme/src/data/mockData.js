@@ -490,6 +490,70 @@ export const apiChangeMap = {
     changesDetected: [
       { field: 'middle_name', type: 'removed', description: "Field 'middle_name' was removed from response payload", severity: 'warning' }
     ]
+  },
+  'Payments API': {
+    apiName: 'Payments API',
+    endpoint: 'https://api.payments.corp/v2/transactions',
+    alertTitle: 'Semantic Status Shift (PAID → PROCESSING)',
+    alertType: 'breaking',
+    timestamp: new Date().toISOString(),
+    previousResponse: {
+      transactionId: "tx_90123",
+      status: "PAID",
+      amount: 1500,
+      settledAt: "2026-10-12T00:00:00Z"
+    },
+    currentResponse: {
+      transactionId: "tx_90123",
+      status: "PROCESSING",
+      amount: 1500,
+      settledAt: null
+    },
+    changesDetected: [
+      { field: 'status', type: 'semantic_drift', description: "Field 'status' changed from 'PAID' to asynchronous 'PROCESSING'", severity: 'breaking' }
+    ]
+  },
+  'Products API': {
+    apiName: 'Products API',
+    endpoint: 'https://api.catalog.corp/v1/products',
+    alertTitle: 'Data Type Shift Detected (price: number → string)',
+    alertType: 'breaking',
+    timestamp: new Date().toISOString(),
+    previousResponse: {
+      id: "prod_402",
+      name: "Cloud Gateway Router",
+      price: 50,
+      inStock: true
+    },
+    currentResponse: {
+      id: "prod_402",
+      name: "Cloud Gateway Router",
+      price: "50",
+      inStock: true
+    },
+    changesDetected: [
+      { field: 'price', type: 'type_change', description: "Field 'price' changed from number (50) to string (\"50\")", severity: 'breaking' }
+    ]
+  },
+  'Inventory MCP Service': {
+    apiName: 'Inventory MCP Service',
+    endpoint: 'mcp://inventory-service/tools/check_stock',
+    alertTitle: 'Parameter Renamed (sku → item_code)',
+    alertType: 'breaking',
+    timestamp: new Date().toISOString(),
+    previousResponse: {
+      sku: "SKU-9901",
+      quantity: 120,
+      warehouse: "Central-1"
+    },
+    currentResponse: {
+      item_code: "SKU-9901",
+      quantity: 120,
+      warehouse: "Central-1"
+    },
+    changesDetected: [
+      { field: 'sku', newField: 'item_code', type: 'renamed', description: "Parameter 'sku' was replaced with 'item_code'", severity: 'breaking' }
+    ]
   }
 };
 
@@ -534,7 +598,8 @@ export const impactAnalysisData = {
       description: 'Missing field: temp → temperature',
       component: 'WeatherCard.jsx, CurrentTempWidget.jsx',
       details: 'Component relies on res.temp. Rendering undefined produces blank temperature card for users.',
-      lineNum: 'WeatherCard.jsx:42'
+      lineNum: 'WeatherCard.jsx:42',
+      isConfirmed: true
     },
     {
       id: 'ep-2',
@@ -545,7 +610,8 @@ export const impactAnalysisData = {
       description: 'Response format changed',
       component: 'CitySearch.jsx',
       details: 'City search results parsing expects legacy structure with array wrapping.',
-      lineNum: 'CitySearch.jsx:105'
+      lineNum: 'CitySearch.jsx:105',
+      isConfirmed: true
     },
     {
       id: 'ep-3',
@@ -556,7 +622,8 @@ export const impactAnalysisData = {
       description: 'Data mapping required',
       component: 'WeatherAlertWorker.ts',
       details: 'Push notification engine filters on condition string which now includes localized tags.',
-      lineNum: 'WeatherAlertWorker.ts:63'
+      lineNum: 'WeatherAlertWorker.ts:63',
+      isConfirmed: false
     },
     {
       id: 'ep-4',
@@ -567,13 +634,15 @@ export const impactAnalysisData = {
       description: 'Optional field removed',
       component: 'UserPreferenceService.ts',
       details: 'Default fallback exists for legacy unit preferences. Non-breaking for end users.',
-      lineNum: 'UserPreferenceService.ts:28'
+      lineNum: 'UserPreferenceService.ts:28',
+      isConfirmed: false
     }
   ]
 };
 
 export const impactAnalysisMap = {
   'Weather API (Latest Change)': impactAnalysisData,
+  'Weather API': impactAnalysisData,
   'GitHub API (Header Change)': {
     selectedApi: 'GitHub API (Header Change)',
     totalAffected: 3,
@@ -687,7 +756,209 @@ export const impactAnalysisMap = {
         lineNum: 'WelcomeMessage.jsx:18'
       }
     ]
+  },
+  'Products API (Type Drift)': {
+    selectedApi: 'Products API (Type Drift)',
+    totalAffected: 4,
+    breakdown: [
+      { category: 'Frontend Pages', count: 3, examples: 'e.g. Product Detail, Cart Total, Search Results', icon: 'layout', accentColor: '#3B82F6' },
+      { category: 'Backend Services', count: 1, examples: 'e.g. Checkout Service', icon: 'server', accentColor: '#6555FF' },
+      { category: 'External Integrations', count: 0, examples: 'None affected', icon: 'share-2', accentColor: '#F59E0B' }
+    ],
+    severity: {
+      high: { count: 2, percentage: 50, color: '#EF4444' },
+      medium: { count: 2, percentage: 50, color: '#F59E0B' },
+      low: { count: 0, percentage: 0, color: '#10B981' }
+    },
+    affectedEndpoints: [
+      {
+        id: 'ep-prod-1',
+        endpoint: 'GET /v1/products/101',
+        service: 'Frontend',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: 'Field "price" string representation causes NaN in Cart Total',
+        component: 'CartTotal.jsx',
+        details: 'Type coercion missing: typeof price is string ("50"). Addition results in string concatenation and NaN total arithmetic.',
+        lineNum: 'CartTotal.jsx:88',
+        isConfirmed: true
+      },
+      {
+        id: 'ep-prod-2',
+        endpoint: 'POST /v1/checkout/calculate',
+        service: 'Backend',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: 'Currency calculation validation schema exception',
+        component: 'CheckoutService.ts',
+        details: 'JSON schema validator enforces price: type number. Payload fails validation returning HTTP 422 Unprocessable Entity.',
+        lineNum: 'CheckoutService.ts:142',
+        isConfirmed: true
+      },
+      {
+        id: 'ep-prod-3',
+        endpoint: 'GET /v1/products/search',
+        service: 'Frontend',
+        impact: 'Medium',
+        impactClass: 'bg-amber-50 text-amber-600 border border-amber-200',
+        description: 'Price range filter slider sorting anomaly',
+        component: 'SearchResults.jsx',
+        details: 'Lexicographical sorting on string price causes $100 to sort before $50.',
+        lineNum: 'SearchResults.jsx:62',
+        isConfirmed: false
+      }
+    ]
+  },
+  'Payments API (Semantic Shift)': {
+    selectedApi: 'Payments API (Semantic Shift)',
+    totalAffected: 3,
+    breakdown: [
+      { category: 'Frontend Pages', count: 2, examples: 'e.g. Order Status, Payment Confirmation', icon: 'layout', accentColor: '#3B82F6' },
+      { category: 'Backend Services', count: 1, examples: 'e.g. Immediate Checkout Worker', icon: 'server', accentColor: '#6555FF' },
+      { category: 'External Integrations', count: 0, examples: 'None affected', icon: 'share-2', accentColor: '#F59E0B' }
+    ],
+    severity: {
+      high: { count: 2, percentage: 67, color: '#EF4444' },
+      medium: { count: 1, percentage: 33, color: '#F59E0B' },
+      low: { count: 0, percentage: 0, color: '#10B981' }
+    },
+    affectedEndpoints: [
+      {
+        id: 'ep-pay-1',
+        endpoint: 'GET /v1/payments/ORD-1',
+        service: 'Frontend',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: 'Status "PROCESSING" breaks synchronous settlement expectation',
+        component: 'OrderStatus.jsx',
+        details: 'Client expects immediate "PAID". "PROCESSING" status displays indefinite payment pending screen.',
+        lineNum: 'OrderStatus.jsx:54',
+        isConfirmed: true
+      },
+      {
+        id: 'ep-pay-2',
+        endpoint: 'POST /v1/checkout/confirm',
+        service: 'Backend',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: 'Immediate checkout workflow terminates without webhook poll',
+        component: 'ImmediateCheckout.ts',
+        details: 'Asynchronous settlement requires webhook subscription or polling bridge adapter.',
+        lineNum: 'ImmediateCheckout.ts:95',
+        isConfirmed: true
+      },
+      {
+        id: 'ep-pay-3',
+        endpoint: 'POST /v1/webhooks/payment',
+        service: 'Backend',
+        impact: 'Medium',
+        impactClass: 'bg-amber-50 text-amber-600 border border-amber-200',
+        description: 'Payment listener registration queue delay',
+        component: 'WebhookRelay.ts',
+        details: 'Requires fallback timeout to prevent orphaned order checkout states.',
+        lineNum: 'WebhookRelay.ts:31',
+        isConfirmed: false
+      }
+    ]
+  },
+  'Inventory MCP Service (Param Rename)': {
+    selectedApi: 'Inventory MCP Service (Param Rename)',
+    totalAffected: 3,
+    breakdown: [
+      { category: 'Frontend Pages', count: 1, examples: 'e.g. Order Fulfillment View', icon: 'layout', accentColor: '#3B82F6' },
+      { category: 'Backend Services', count: 2, examples: 'e.g. Warehouse Dispatch, Inventory Sync', icon: 'server', accentColor: '#6555FF' },
+      { category: 'External Integrations', count: 0, examples: 'None affected', icon: 'share-2', accentColor: '#F59E0B' }
+    ],
+    severity: {
+      high: { count: 2, percentage: 67, color: '#EF4444' },
+      medium: { count: 1, percentage: 33, color: '#F59E0B' },
+      low: { count: 0, percentage: 0, color: '#10B981' }
+    },
+    affectedEndpoints: [
+      {
+        id: 'ep-inv-1',
+        endpoint: 'mcp://inventory/tools/lookup_stock',
+        service: 'MCP Server',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: 'Tool invocation rejected: required argument "sku" missing',
+        component: 'WarehouseDispatch.ts',
+        details: 'MCP tool schema parameter was renamed from "sku" to "item_code". Autonomous agents fail tool call with invalid params.',
+        lineNum: 'WarehouseDispatch.ts:47',
+        isConfirmed: true
+      },
+      {
+        id: 'ep-inv-2',
+        endpoint: 'POST /v1/inventory/reserve',
+        service: 'Backend',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: 'Stock reservation worker runtime KeyError',
+        component: 'InventorySyncWorker.ts',
+        details: 'Worker expects params.sku; receiving params.item_code leaves item identifier undefined.',
+        lineNum: 'InventorySyncWorker.ts:83',
+        isConfirmed: true
+      },
+      {
+        id: 'ep-inv-3',
+        endpoint: 'GET /v1/orders/fulfillment',
+        service: 'Frontend',
+        impact: 'Medium',
+        impactClass: 'bg-amber-50 text-amber-600 border border-amber-200',
+        description: 'Estimated fulfillment date displayed with stock unknown badge',
+        component: 'OrderFulfillment.jsx',
+        details: 'Fulfillment UI displays degraded warning banner when inventory sync fails.',
+        lineNum: 'OrderFulfillment.jsx:29',
+        isConfirmed: false
+      }
+    ]
   }
+};
+
+export const getImpactAnalysis = (serviceIdentifier) => {
+  if (!serviceIdentifier) return impactAnalysisData;
+  const key = String(serviceIdentifier).trim();
+
+  // 1. Direct match
+  if (impactAnalysisMap[key]) return impactAnalysisMap[key];
+
+  // 2. Fuzzy match
+  const lower = key.toLowerCase();
+  for (const [mapKey, val] of Object.entries(impactAnalysisMap)) {
+    if (mapKey.toLowerCase().includes(lower) || lower.includes(mapKey.toLowerCase().split(' ')[0])) {
+      return val;
+    }
+  }
+
+  // 3. Fallback generic blast radius
+  return {
+    selectedApi: serviceIdentifier,
+    totalAffected: 3,
+    breakdown: [
+      { category: 'Frontend Pages', count: 1, examples: `${serviceIdentifier} View`, icon: 'layout', accentColor: '#3B82F6' },
+      { category: 'Backend Services', count: 2, examples: `${serviceIdentifier} Consumer Service`, icon: 'server', accentColor: '#6555FF' },
+      { category: 'External Integrations', count: 0, examples: 'None affected', icon: 'share-2', accentColor: '#F59E0B' }
+    ],
+    severity: {
+      high: { count: 1, percentage: 33, color: '#EF4444' },
+      medium: { count: 2, percentage: 67, color: '#F59E0B' },
+      low: { count: 0, percentage: 0, color: '#10B981' }
+    },
+    affectedEndpoints: [
+      {
+        id: `ep-${lower.replace(/[^a-z0-9]/g, '')}-1`,
+        endpoint: `/api/${lower.replace(/[^a-z0-9]/g, '')}`,
+        service: 'Frontend',
+        impact: 'High',
+        impactClass: 'bg-red-50 text-red-600 border border-red-200',
+        description: `${serviceIdentifier} contract shift detected`,
+        component: `${serviceIdentifier}Consumer.jsx`,
+        details: 'Downstream component failed schema assertion.',
+        lineNum: `${serviceIdentifier}Consumer.jsx:42`,
+        isConfirmed: true
+      }
+    ]
+  };
 };
 
 export const smartRepairData = {
@@ -725,6 +996,7 @@ export function transformWeatherData(data) {
 
 export const smartRepairDataMap = {
   'Weather API': smartRepairData,
+  'weather': smartRepairData,
   'User API': {
     apiName: 'User API',
     title: 'Suggested Fix for User API',
@@ -754,7 +1026,341 @@ export function transformUserData(data) {
       'Protects downstream consumers: UserProfile.jsx and WelcomeMessage.jsx continue working seamlessly.',
       'Backward-compatible fallback: Supports both old and new schema structures.'
     ]
+  },
+  'users': {
+    apiName: 'User API',
+    title: 'Suggested Fix for User API',
+    description: "The API response structure has changed. Field 'name' was replaced by 'display_name'.",
+    instruction: 'Update your client adapter to map display_name to name:',
+    filePath: 'src/services/userClient.js',
+    diffLines: [
+      { type: 'context', text: '  // User API consumer adapter' },
+      { type: 'context', text: '  const response = await fetch(USER_ENDPOINT);' },
+      { type: 'context', text: '  const data = await response.json();' },
+      { type: 'context', text: '  return {' },
+      { type: 'removed', text: '-   name: data.name,' },
+      { type: 'added',   text: '+   name: data.display_name || data.name,' },
+      { type: 'context', text: '    email: data.email' },
+      { type: 'context', text: '  };' }
+    ],
+    rawFixCode: `// Autonomous backward-compatible adapter
+export function transformUserData(data) {
+  return {
+    id: data.id,
+    name: data.display_name || data.name,
+    email: data.email
+  };
+}`,
+    manualReviewNotes: [
+      'Semantics verified: "display_name" matches semantics of "name" with 98% NLP confidence.',
+      'Protects downstream consumers: UserProfile.jsx and WelcomeMessage.jsx continue working seamlessly.',
+      'Backward-compatible fallback: Supports both old and new schema structures.'
+    ]
+  },
+  'Products API': {
+    apiName: 'Products API',
+    title: 'Suggested Fix for Products API',
+    description: "Data type drift detected: field 'price' changed from number to string representation.",
+    instruction: 'Add defensive type coercion in the product catalog adapter:',
+    filePath: 'src/services/productCatalog.js',
+    diffLines: [
+      { type: 'context', text: '  // Products Catalog Adapter' },
+      { type: 'context', text: '  const product = await response.json();' },
+      { type: 'context', text: '  return {' },
+      { type: 'context', text: '    id: product.id,' },
+      { type: 'removed', text: '-   price: product.price,' },
+      { type: 'added',   text: '+   price: typeof product.price === "string" ? parseFloat(product.price) : product.price,' },
+      { type: 'context', text: '    inStock: product.inStock' },
+      { type: 'context', text: '  };' }
+    ],
+    rawFixCode: `// Autonomous defensive type coercer
+export function adaptProductContract(data) {
+  return {
+    id: data.id,
+    name: data.name,
+    price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
+    inStock: Boolean(data.inStock)
+  };
+}`,
+    manualReviewNotes: [
+      'Type contract guarded: Coerces string-encoded numbers back to native float.',
+      'Prevents currency calculation and NaN arithmetic errors downstream.',
+      'Manual engineering review recommended to align database column schema.'
+    ]
+  },
+  'products': {
+    apiName: 'Products API',
+    title: 'Suggested Fix for Products API',
+    description: "Data type drift detected: field 'price' changed from number to string representation.",
+    instruction: 'Add defensive type coercion in the product catalog adapter:',
+    filePath: 'src/services/productCatalog.js',
+    diffLines: [
+      { type: 'context', text: '  // Products Catalog Adapter' },
+      { type: 'context', text: '  const product = await response.json();' },
+      { type: 'context', text: '  return {' },
+      { type: 'context', text: '    id: product.id,' },
+      { type: 'removed', text: '-   price: product.price,' },
+      { type: 'added',   text: '+   price: typeof product.price === "string" ? parseFloat(product.price) : product.price,' },
+      { type: 'context', text: '    inStock: product.inStock' },
+      { type: 'context', text: '  };' }
+    ],
+    rawFixCode: `// Autonomous defensive type coercer
+export function adaptProductContract(data) {
+  return {
+    id: data.id,
+    name: data.name,
+    price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
+    inStock: Boolean(data.inStock)
+  };
+}`,
+    manualReviewNotes: [
+      'Type contract guarded: Coerces string-encoded numbers back to native float.',
+      'Prevents currency calculation and NaN arithmetic errors downstream.',
+      'Manual engineering review recommended to align database column schema.'
+    ]
+  },
+  'Payments API': {
+    apiName: 'Payments API',
+    title: 'Suggested Semantic Adapter for Payments API',
+    description: "Upstream gateway introduced asynchronous settlement: status 'PAID' shifted to 'PROCESSING'.",
+    instruction: 'Bridge asynchronous settlement contract in payments handler:',
+    filePath: 'src/services/paymentGateway.js',
+    diffLines: [
+      { type: 'context', text: '  // Payments Gateway Response Adapter' },
+      { type: 'context', text: '  const tx = await response.json();' },
+      { type: 'removed', text: '- if (tx.status === "PAID") completeCheckout(tx);' },
+      { type: 'added',   text: '+ if (tx.status === "PROCESSING") registerWebhookListener(tx.transactionId);' },
+      { type: 'added',   text: '+ const mappedStatus = tx.status === "PROCESSING" ? "PAID" : tx.status;' },
+      { type: 'context', text: '  return { ...tx, status: mappedStatus };' }
+    ],
+    rawFixCode: `// Autonomous semantic state adapter
+export function adaptPaymentStatus(data) {
+  if (data.status === 'PROCESSING') {
+    data._semanticShift = 'PROCESSING_MAPPED_TO_PAID';
+    data.status = 'PAID';
   }
+  return data;
+}`,
+    manualReviewNotes: [
+      'Bridge adapter active: maps asynchronous PROCESSING state to synchronous client expectation.',
+      'Webhook listener registered to capture final settlement event.',
+      'Confidence: 0.68 — Requires explicit engineering review before production deploy.'
+    ]
+  },
+  'payments': {
+    apiName: 'Payments API',
+    title: 'Suggested Semantic Adapter for Payments API',
+    description: "Upstream gateway introduced asynchronous settlement: status 'PAID' shifted to 'PROCESSING'.",
+    instruction: 'Bridge asynchronous settlement contract in payments handler:',
+    filePath: 'src/services/paymentGateway.js',
+    diffLines: [
+      { type: 'context', text: '  // Payments Gateway Response Adapter' },
+      { type: 'context', text: '  const tx = await response.json();' },
+      { type: 'removed', text: '- if (tx.status === "PAID") completeCheckout(tx);' },
+      { type: 'added',   text: '+ if (tx.status === "PROCESSING") registerWebhookListener(tx.transactionId);' },
+      { type: 'added',   text: '+ const mappedStatus = tx.status === "PROCESSING" ? "PAID" : tx.status;' },
+      { type: 'context', text: '  return { ...tx, status: mappedStatus };' }
+    ],
+    rawFixCode: `// Autonomous semantic state adapter
+export function adaptPaymentStatus(data) {
+  if (data.status === 'PROCESSING') {
+    data._semanticShift = 'PROCESSING_MAPPED_TO_PAID';
+    data.status = 'PAID';
+  }
+  return data;
+}`,
+    manualReviewNotes: [
+      'Bridge adapter active: maps asynchronous PROCESSING state to synchronous client expectation.',
+      'Webhook listener registered to capture final settlement event.',
+      'Confidence: 0.68 — Requires explicit engineering review before production deploy.'
+    ]
+  },
+  'GitHub API': {
+    apiName: 'GitHub API',
+    title: 'Suggested Fix for GitHub API',
+    description: "Upstream API requires version header 'x-github-api-version' to ensure predictable contracts.",
+    instruction: 'Inject version header into HTTP client wrapper:',
+    filePath: 'src/services/githubClient.js',
+    diffLines: [
+      { type: 'context', text: '  // GitHub API request headers' },
+      { type: 'context', text: '  headers: {' },
+      { type: 'context', text: '    "Accept": "application/vnd.github+json",' },
+      { type: 'added',   text: '+   "x-github-api-version": "2024-04-01",' },
+      { type: 'context', text: '    "Authorization": `Bearer ${token}`' },
+      { type: 'context', text: '  }' }
+    ],
+    rawFixCode: `// Header compatibility injector
+export function getGitHubHeaders(token) {
+  return {
+    'Accept': 'application/vnd.github+json',
+    'x-github-api-version': '2024-04-01',
+    'Authorization': \`Bearer \${token}\`
+  };
+}`,
+    manualReviewNotes: [
+      'Puddles breaking header requirement: pinned to stable API version 2024-04-01.',
+      'Applies across all GitHub repository querying endpoints.'
+    ]
+  },
+  'github': {
+    apiName: 'GitHub API',
+    title: 'Suggested Fix for GitHub API',
+    description: "Upstream API requires version header 'x-github-api-version' to ensure predictable contracts.",
+    instruction: 'Inject version header into HTTP client wrapper:',
+    filePath: 'src/services/githubClient.js',
+    diffLines: [
+      { type: 'context', text: '  // GitHub API request headers' },
+      { type: 'context', text: '  headers: {' },
+      { type: 'context', text: '    "Accept": "application/vnd.github+json",' },
+      { type: 'added',   text: '+   "x-github-api-version": "2024-04-01",' },
+      { type: 'context', text: '    "Authorization": `Bearer ${token}`' },
+      { type: 'context', text: '  }' }
+    ],
+    rawFixCode: `// Header compatibility injector
+export function getGitHubHeaders(token) {
+  return {
+    'Accept': 'application/vnd.github+json',
+    'x-github-api-version': '2024-04-01',
+    'Authorization': \`Bearer \${token}\`
+  };
+}`,
+    manualReviewNotes: [
+      'Puddles breaking header requirement: pinned to stable API version 2024-04-01.',
+      'Applies across all GitHub repository querying endpoints.'
+    ]
+  },
+  'Stripe API': {
+    apiName: 'Stripe API',
+    title: 'Suggested Optimization for Stripe API',
+    description: "Round-trip latency degraded to 480ms (>300ms SLA). Circuit breaker & retry backoff recommended.",
+    instruction: 'Configure exponential backoff and timeout threshold:',
+    filePath: 'src/services/stripeClient.js',
+    diffLines: [
+      { type: 'context', text: '  // Stripe HTTP timeout & retry configuration' },
+      { type: 'removed', text: '- timeout: 10000,' },
+      { type: 'added',   text: '+ timeout: 5000,' },
+      { type: 'added',   text: '+ maxNetworkRetries: 3,' },
+      { type: 'added',   text: '+ circuitBreaker: { threshold: 0.5, timeoutMs: 300 },' }
+    ],
+    rawFixCode: `// Autonomous latency resilience wrapper
+export const stripeConfig = {
+  timeout: 5000,
+  maxNetworkRetries: 3,
+  telemetry: true,
+  circuitBreaker: { threshold: 0.5, timeoutMs: 300 }
+};`,
+    manualReviewNotes: [
+      'Performance drift mitigated: isolates high-latency upstream responses from blocking UI thread.',
+      'Circuit breaker opens if latency consistently exceeds 300ms SLA.'
+    ]
+  },
+  'stripe': {
+    apiName: 'Stripe API',
+    title: 'Suggested Optimization for Stripe API',
+    description: "Round-trip latency degraded to 480ms (>300ms SLA). Circuit breaker & retry backoff recommended.",
+    instruction: 'Configure exponential backoff and timeout threshold:',
+    filePath: 'src/services/stripeClient.js',
+    diffLines: [
+      { type: 'context', text: '  // Stripe HTTP timeout & retry configuration' },
+      { type: 'removed', text: '- timeout: 10000,' },
+      { type: 'added',   text: '+ timeout: 5000,' },
+      { type: 'added',   text: '+ maxNetworkRetries: 3,' },
+      { type: 'added',   text: '+ circuitBreaker: { threshold: 0.5, timeoutMs: 300 },' }
+    ],
+    rawFixCode: `// Autonomous latency resilience wrapper
+export const stripeConfig = {
+  timeout: 5000,
+  maxNetworkRetries: 3,
+  telemetry: true,
+  circuitBreaker: { threshold: 0.5, timeoutMs: 300 }
+};`,
+    manualReviewNotes: [
+      'Performance drift mitigated: isolates high-latency upstream responses from blocking UI thread.',
+      'Circuit breaker opens if latency consistently exceeds 300ms SLA.'
+    ]
+  },
+  'Inventory MCP Service': {
+    apiName: 'Inventory MCP Service',
+    title: 'Suggested Fix for Inventory MCP Tool',
+    description: "Tool contract renamed parameter 'sku' to 'item_code'. Compatibility adapter maps invocation keys.",
+    instruction: 'Update MCP tool caller invocation mapping:',
+    filePath: 'src/mcp/tools/inventoryAdapter.js',
+    diffLines: [
+      { type: 'context', text: '  // MCP Tool parameter invocation' },
+      { type: 'context', text: '  const params = {' },
+      { type: 'removed', text: '-   sku: item.sku' },
+      { type: 'added',   text: '+   item_code: item.sku ?? item.item_code' },
+      { type: 'context', text: '  };' }
+    ],
+    rawFixCode: `// Inventory MCP Tool adapter
+export function adaptInventoryParams(params) {
+  if (params.sku !== undefined && params.item_code === undefined) {
+    params.item_code = params.sku;
+  }
+  return params;
+}`,
+    manualReviewNotes: [
+      'MCP contract repaired: translates legacy agent "sku" parameters to "item_code".',
+      'Autonomous agent tool execution validated with 100% test integrity.'
+    ]
+  },
+  'inventory-mcp': {
+    apiName: 'Inventory MCP Service',
+    title: 'Suggested Fix for Inventory MCP Tool',
+    description: "Tool contract renamed parameter 'sku' to 'item_code'. Compatibility adapter maps invocation keys.",
+    instruction: 'Update MCP tool caller invocation mapping:',
+    filePath: 'src/mcp/tools/inventoryAdapter.js',
+    diffLines: [
+      { type: 'context', text: '  // MCP Tool parameter invocation' },
+      { type: 'context', text: '  const params = {' },
+      { type: 'removed', text: '-   sku: item.sku' },
+      { type: 'added',   text: '+   item_code: item.sku ?? item.item_code' },
+      { type: 'context', text: '  };' }
+    ],
+    rawFixCode: `// Inventory MCP Tool adapter
+export function adaptInventoryParams(params) {
+  if (params.sku !== undefined && params.item_code === undefined) {
+    params.item_code = params.sku;
+  }
+  return params;
+}`,
+    manualReviewNotes: [
+      'MCP contract repaired: translates legacy agent "sku" parameters to "item_code".',
+      'Autonomous agent tool execution validated with 100% test integrity.'
+    ]
+  }
+};
+
+export const getSmartRepairData = (serviceIdentifier) => {
+  if (!serviceIdentifier) return null;
+  const key = String(serviceIdentifier).trim();
+  if (smartRepairDataMap[key]) return smartRepairDataMap[key];
+  const lower = key.toLowerCase();
+  for (const [k, val] of Object.entries(smartRepairDataMap)) {
+    if (k.toLowerCase() === lower || (val.apiName && val.apiName.toLowerCase() === lower)) {
+      return val;
+    }
+  }
+  // Generic safe adapter fallback for any dynamic service
+  return {
+    apiName: serviceIdentifier,
+    title: `Suggested Adapter for ${serviceIdentifier}`,
+    description: `Automated compatibility layer generated for ${serviceIdentifier} schema variation.`,
+    instruction: 'Update client consumption layer with defensive boundary:',
+    filePath: `src/services/${lower.replace(/[^a-z0-9]/g, '_')}Client.js`,
+    diffLines: [
+      { type: 'context', text: `  // Boundary adapter for ${serviceIdentifier}` },
+      { type: 'removed', text: '-  return await response.json();' },
+      { type: 'added',   text: '+  const raw = await response.json();' },
+      { type: 'added',   text: '+  return sanitizeAndNormalize(raw);' }
+    ],
+    rawFixCode: `// Autonomous defensive boundary adapter\nexport function adapt${lower.replace(/[^a-z0-9]/g, '')}Response(data) {\n  return sanitizeAndNormalize(data);\n}`,
+    manualReviewNotes: [
+      'Defensive mapping applied at gateway boundary.',
+      'Prevents client consumer runtime TypeError exceptions.',
+      'Validated against regression schema contract.'
+    ]
+  };
 };
 
 export const validationTestsList = [

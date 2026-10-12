@@ -20,10 +20,46 @@ import ImpactAnalysisPage from './pages/ImpactAnalysisPage';
 import SmartRepairPage from './pages/SmartRepairPage';
 import ValidationRecoveryPage from './pages/ValidationRecoveryPage';
 import SettingsPage from './pages/SettingsPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 
 export default function App() {
   const { activePage, setActivePage, themeMode } = useApp();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Sync activePage with browser URL pathname (/login, /signup)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname.toLowerCase();
+      if (pathname === '/login') {
+        setActivePage('login');
+      } else if (pathname === '/signup') {
+        setActivePage('signup');
+      }
+
+      const handlePopState = () => {
+        const path = window.location.pathname.toLowerCase();
+        if (path === '/login') setActivePage('login');
+        else if (path === '/signup') setActivePage('signup');
+        else setActivePage('dashboard');
+      };
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
+    }
+  }, [setActivePage]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname.toLowerCase();
+      if (activePage === 'login' && currentPath !== '/login') {
+        window.history.pushState(null, '', '/login');
+      } else if (activePage === 'signup' && currentPath !== '/signup') {
+        window.history.pushState(null, '', '/signup');
+      } else if (activePage !== 'login' && activePage !== 'signup' && (currentPath === '/login' || currentPath === '/signup')) {
+        window.history.pushState(null, '', '/');
+      }
+    }
+  }, [activePage]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -41,6 +77,27 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [setActivePage]);
 
+  // Full-page modern authentication views
+  if (activePage === 'login') {
+    return (
+      <div className="min-h-screen bg-[#050D1B]">
+        <LoginPage />
+        <Toast />
+        <DemoToolbar />
+      </div>
+    );
+  }
+
+  if (activePage === 'signup') {
+    return (
+      <div className="min-h-screen bg-[#050D1B]">
+        <SignupPage />
+        <Toast />
+        <DemoToolbar />
+      </div>
+    );
+  }
+
   const renderActivePage = () => {
     switch (activePage) {
       case 'dashboard':
@@ -57,6 +114,10 @@ export default function App() {
         return <ValidationRecoveryPage />;
       case 'settings':
         return <SettingsPage />;
+      case 'login':
+        return <LoginPage />;
+      case 'signup':
+        return <SignupPage />;
       default:
         return <DashboardPage />;
     }

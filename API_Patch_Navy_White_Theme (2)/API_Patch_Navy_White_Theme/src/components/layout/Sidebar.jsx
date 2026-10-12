@@ -13,7 +13,7 @@ import {
 import { useApp } from '../../context/AppContext';
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
-  const { activePage, setActivePage, unresolvedCount = 0 } = useApp();
+  const { activePage, setActivePage, unresolvedCount = 0, currentUser } = useApp();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -103,6 +103,33 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           <p className="text-[9px] text-slate-400 mt-0.5">
             Autonomous schema monitoring active
           </p>
+        </div>
+
+        {/* User Session Chip */}
+        <div className="px-4 py-2 border-t border-[#1E293B]/60 bg-[#081222]/50 flex items-center justify-between">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <div className="w-5 h-5 rounded-full bg-[#1D3B70] text-[10px] font-bold text-white flex items-center justify-center flex-shrink-0">
+              {currentUser?.name ? currentUser.name[0].toUpperCase() : 'G'}
+            </div>
+            <span className="text-[11px] text-slate-300 truncate max-w-[110px]">
+              {currentUser ? currentUser.name : 'Guest Sandbox'}
+            </span>
+          </div>
+          {currentUser ? (
+            <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              SQLite
+            </span>
+          ) : (
+            <button
+              onClick={() => {
+                setActivePage('login');
+                if (setMobileOpen) setMobileOpen(false);
+              }}
+              className="text-[10px] text-[#405CFF] hover:underline font-medium"
+            >
+              Sign In
+            </button>
+          )}
         </div>
 
         {/* Sidebar Footer with System Online Status */}

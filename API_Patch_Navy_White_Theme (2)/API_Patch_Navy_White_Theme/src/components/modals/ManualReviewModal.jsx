@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { X, Check, Code, GitCommit, Shield, FileText } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { smartRepairData, smartRepairDataMap } from '../../data/mockData';
+import { smartRepairData, getSmartRepairData } from '../../data/mockData';
 
 export default function ManualReviewModal() {
   const { isManualReviewOpen, setIsManualReviewOpen, applyFix, addToast, selectedIncidentApi } = useApp();
   const [activeTab, setActiveTab] = useState('diff');
 
-  const activeRepair = (smartRepairDataMap && smartRepairDataMap[selectedIncidentApi]) || smartRepairData;
+  const activeRepair = getSmartRepairData(selectedIncidentApi) || smartRepairData;
 
   if (!isManualReviewOpen) return null;
 

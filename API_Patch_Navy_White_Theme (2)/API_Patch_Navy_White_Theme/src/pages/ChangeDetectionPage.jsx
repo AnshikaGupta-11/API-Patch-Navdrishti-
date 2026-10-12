@@ -32,7 +32,8 @@ export default function ChangeDetectionPage() {
     setActivePage, 
     addToast,
     triggerIncident,
-    fetchBackendData
+    fetchBackendData,
+    isSimulating
   } = useApp();
 
   const [timeRange, setTimeRange] = useState('Last 24 hours');
@@ -67,7 +68,7 @@ export default function ChangeDetectionPage() {
   const changedApis = apis.filter(a => a.status === 'Changed');
 
   const allActiveChanges = [];
-  if (backendConnected && changesData.length > 0) {
+  if (backendConnected) {
     changesData.forEach((item) => {
       const fallback = (apiChangeMap && (apiChangeMap[item.serviceName] || apiChangeMap[item.serviceName?.replace('Service', 'API')])) || {};
       allActiveChanges.push({
@@ -119,18 +120,17 @@ export default function ChangeDetectionPage() {
   const hasActiveChanges = allActiveChanges.length > 0;
 
   // The active featured change
-  let featured = null;
-  if (hasActiveChanges) {
-    featured = allActiveChanges.find(c => c.apiName === selectedChangeApi) || allActiveChanges[0];
-  } else if (apiChangeMap && apiChangeMap[selectedChangeApi]) {
-    featured = apiChangeMap[selectedChangeApi];
-  }
+  const featured = hasActiveChanges
+    ? (allActiveChanges.find(c => c.apiName === selectedChangeApi) || allActiveChanges[0])
+    : null;
 
-  // Other detected changes: include other active changes plus historical mock events
+  // Other detected changes: include other active changes plus historical mock events only when changes exist
   const otherActiveChanges = allActiveChanges.filter(c => featured && c.apiName !== featured.apiName);
-  const catalogHistorical = (changeDetectionData.otherChanges || []).filter(
-    c => featured && c.apiName !== featured.apiName && !otherActiveChanges.some(oa => oa.apiName === c.apiName)
-  );
+  const catalogHistorical = !hasActiveChanges
+    ? []
+    : (changeDetectionData.otherChanges || []).filter(
+        c => featured && c.apiName !== featured.apiName && !otherActiveChanges.some(oa => oa.apiName === c.apiName)
+      );
 
   const allOtherItems = [...otherActiveChanges, ...catalogHistorical];
 
@@ -167,6 +167,20 @@ export default function ChangeDetectionPage() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => triggerIncident('auto')}
+            disabled={isSimulating}
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 hover:bg-red-500 text-white flex items-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
+            title="Simulate breaking schema change across monitored services"
+          >
+            {isSimulating ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Zap className="w-3.5 h-3.5 fill-current" />
+            )}
+            <span>{isSimulating ? 'Simulating...' : 'Simulate Change'}</span>
+          </button>
+
           <button
             onClick={handleRunMonitor}
             disabled={isScanning}
@@ -206,7 +220,7 @@ export default function ChangeDetectionPage() {
       )}
 
       {/* Empty State: No Contract Differences */}
-      {!hasActiveChanges && !featured ? (
+      {!hasActiveChanges || !featured ? (
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-card p-8 sm:p-12 text-center space-y-5 animate-in fade-in duration-200">
           <div className="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 mx-auto shadow-sm">
             <CheckCircle2 className="w-8 h-8" />
@@ -229,18 +243,28 @@ export default function ChangeDetectionPage() {
               {isScanning ? 'Scanning Contracts...' : 'Run Monitor Check'}
             </button>
             <button
+              onClick={() => triggerIncident('auto')}
+              disabled={isSimulating}
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg shadow-sm flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            >
+              {isSimulating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-current" />}
+              {isSimulating ? 'Simulating...' : 'Simulate Next Incident'}
+            </button>
+            <button
               onClick={() => triggerIncident('Weather API')}
-              className="px-3.5 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg shadow-subtle flex items-center gap-1.5 transition-colors"
+              disabled={isSimulating}
+              className="px-3.5 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg shadow-subtle flex items-center gap-1.5 transition-colors disabled:opacity-50"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              Simulate Weather API Incident
+              Weather API
             </button>
             <button
               onClick={() => triggerIncident('User API')}
-              className="px-3.5 py-2 text-xs font-semibold text-[#405CFF] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg shadow-subtle flex items-center gap-1.5 transition-colors"
+              disabled={isSimulating}
+              className="px-3.5 py-2 text-xs font-semibold text-[#405CFF] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg shadow-subtle flex items-center gap-1.5 transition-colors disabled:opacity-50"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              Simulate User API Shift
+              User API
             </button>
           </div>
         </div>

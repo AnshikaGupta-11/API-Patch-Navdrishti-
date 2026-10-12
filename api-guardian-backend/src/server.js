@@ -23,6 +23,12 @@ const {
   runSdkWorkflow,
   resetSdkScenario
 } = require("./sdk-compat");
+const {
+  registerHandler,
+  loginHandler,
+  meHandler,
+  logoutHandler
+} = require("./auth");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,6 +40,17 @@ app.use(express.json());
 function sendError(res, status, message) {
   return res.status(status).json({ error: message });
 }
+
+// ----------------------------------------------------------------------
+// 0. Authentication Endpoints (Persistent SQLite & Scrypt Security)
+// ----------------------------------------------------------------------
+
+app.post("/api/auth/register", registerHandler);
+app.post("/api/auth/signup", registerHandler);
+app.post("/api/auth/login", loginHandler);
+app.get("/api/auth/me", meHandler);
+app.post("/api/auth/logout", logoutHandler);
+
 
 // ----------------------------------------------------------------------
 // 1. Health & Dashboard Overview Endpoints
@@ -169,7 +186,8 @@ app.post("/api/monitor/run", (_req, res) => {
   for (const service of Object.values(store.state.services)) {
     service.lastObservedAt = new Date().toISOString();
     const baseline = store.state.baselines[service.id];
-    const changes = detectChanges(baseline, service.current);
+    const observed = normalisedResponse(service, store.state);
+    const changes = detectChanges(baseline, observed);
 
     summary.push({
       serviceId: service.id,
@@ -183,6 +201,7 @@ app.post("/api/monitor/run", (_req, res) => {
         (incident) =>
           incident.serviceId === service.id &&
           incident.status !== "VALIDATED" &&
+          incident.status !== "RESOLVED" &&
           incident.status !== "CLOSED"
       );
 
@@ -244,7 +263,7 @@ app.post("/api/monitor/run", (_req, res) => {
     summary,
     incidents: created,
     totalOpenIncidents: store.state.incidents.filter(
-      (incident) => !["VALIDATED", "CLOSED"].includes(incident.status)
+      (incident) => !["VALIDATED", "RESOLVED", "CLOSED"].includes(incident.status)
     ).length
   });
 });

@@ -206,7 +206,7 @@ function initialState() {
     },
     github: {
       statusCode: 200,
-      headers: { "x-ratelimit-limit": "5000" },
+      headers: { "x-ratelimit-limit": "5000", "x-ratelimit-remaining": "4990" },
       body: { status: "operational" },
       requiredFields: ["status"]
     },
@@ -483,6 +483,7 @@ class Store {
         statusCode: 200,
         headers: {
           "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4990",
           "x-github-api-version": "2026-10-10"
         },
         body: { status: "operational" }

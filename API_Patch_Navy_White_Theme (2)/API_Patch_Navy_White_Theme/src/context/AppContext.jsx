@@ -18,6 +18,16 @@ export const generateUniqueActivityId = (prefix = 'act') => {
 
 const AppContext = createContext();
 
+export const SIMULATABLE_SERVICES = [
+  { id: 'weather', name: 'Weather API', description: 'Field Rename (temp → temperature, city → city_name)' },
+  { id: 'users', name: 'User API', description: 'Field Rename (name → display_name)' },
+  { id: 'products', name: 'Products API', description: 'Type Drift (price: 50 → "50")' },
+  { id: 'payments', name: 'Payments API', description: 'Semantic Shift (status: PAID → PROCESSING)' },
+  { id: 'github', name: 'GitHub API', description: 'Header Addition (x-github-api-version)' },
+  { id: 'stripe', name: 'Stripe API', description: 'Performance Drift (220ms → 480ms)' },
+  { id: 'inventory-mcp', name: 'Inventory MCP Service', description: 'Parameter Rename (sku → item_code)' }
+];
+
 export function AppProvider({ children }) {
   const [activePage, setActivePage] = useState('dashboard');
   const [apis, setApis] = useState(initialApis);
@@ -37,12 +47,14 @@ export function AppProvider({ children }) {
   const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
   const [selectedEndpointDetail, setSelectedEndpointDetail] = useState(null);
   const [selectedIncidentApi, setSelectedIncidentApi] = useState('Weather API');
+  const [isSimulating, setIsSimulating] = useState(false);
 
   // Backend live sync state
   const [backendConnected, setBackendConnected] = useState(false);
   const [liveIncidents, setLiveIncidents] = useState([]);
   const [changesData, setChangesData] = useState([]);
   const [dependencies, setDependencies] = useState([]);
+  const [dependenciesGraph, setDependenciesGraph] = useState(null);
   const [webhooks, setWebhooks] = useState([]);
   const [mcpTools, setMcpTools] = useState([]);
   const [sdkStatus, setSdkStatus] = useState(null);
@@ -61,6 +73,24 @@ export function AppProvider({ children }) {
     userEmail: 'chinmay@internet-after-api.dev',
     userRole: 'Lead API Reliability Architect'
   });
+
+  // Authentication State (Persistent SQLite Backend)
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('api_guardian_user') : null;
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [authToken, setAuthToken] = useState(() => {
+    try {
+      return typeof window !== 'undefined' ? (localStorage.getItem('api_guardian_token') || null) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [authLoading, setAuthLoading] = useState(false);
 
   const toggleThemeMode = () => {
     setThemeMode(prev => (prev === 'light' ? 'dark' : 'light'));
@@ -81,10 +111,111 @@ export function AppProvider({ children }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
+  const loginUser = async ({ email, password }) => {
+    setAuthLoading(true);
+    try {
+      const res = await apiClient.login({ email, password });
+      if (res.token && res.user) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('api_guardian_token', res.token);
+          localStorage.setItem('api_guardian_user', JSON.stringify(res.user));
+        }
+        setAuthToken(res.token);
+        setCurrentUser(res.user);
+        setSettings(prev => ({
+          ...prev,
+          userFullName: res.user.name || prev.userFullName,
+          userEmail: res.user.email || prev.userEmail
+        }));
+        addToast(`Welcome back, ${res.user.name || 'Engineer'}!`, 'success', 'Authenticated');
+        setActivePage('dashboard');
+        return { success: true, user: res.user };
+      }
+      throw new Error(res.error || 'Login failed');
+    } catch (err) {
+      addToast(err.message || 'Login failed', 'error', 'Authentication Failed');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const signupUser = async ({ name, email, password }) => {
+    setAuthLoading(true);
+    try {
+      const res = await apiClient.signup({ name, email, password });
+      if (res.token && res.user) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('api_guardian_token', res.token);
+          localStorage.setItem('api_guardian_user', JSON.stringify(res.user));
+        }
+        setAuthToken(res.token);
+        setCurrentUser(res.user);
+        setSettings(prev => ({
+          ...prev,
+          userFullName: res.user.name || prev.userFullName,
+          userEmail: res.user.email || prev.userEmail
+        }));
+        addToast('Account created successfully! Welcome to API Patch.', 'success', 'Registration Complete');
+        setActivePage('dashboard');
+        return { success: true, user: res.user };
+      }
+      throw new Error(res.error || 'Sign up failed');
+    } catch (err) {
+      addToast(err.message || 'Sign up failed', 'error', 'Registration Failed');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const logoutUser = async () => {
+    try {
+      await apiClient.logout();
+    } catch {
+      // ignore
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('api_guardian_token');
+        localStorage.removeItem('api_guardian_user');
+      }
+      setAuthToken(null);
+      setCurrentUser(null);
+      addToast('Session terminated. Logged out successfully.', 'info', 'Signed Out');
+      setActivePage('login');
+    }
+  };
+
+  useEffect(() => {
+    fetchBackendData();
+    const token = typeof window !== 'undefined' ? localStorage.getItem('api_guardian_token') : null;
+    if (token) {
+      apiClient.getMe()
+        .then(res => {
+          if (res?.user) {
+            setCurrentUser(res.user);
+            setSettings(prev => ({
+              ...prev,
+              userFullName: res.user.name || prev.userFullName,
+              userEmail: res.user.email || prev.userEmail
+            }));
+          }
+        })
+        .catch(() => {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('api_guardian_token');
+            localStorage.removeItem('api_guardian_user');
+          }
+          setAuthToken(null);
+          setCurrentUser(null);
+        });
+    }
+  }, []);
+
   // Central Sync Function
   const fetchBackendData = async () => {
     try {
-      const [dash, servs, incs, deps, whs, mcp, sdk, chgs] = await Promise.allSettled([
+      const [dash, servs, incs, deps, whs, mcp, sdk, chgs, graph] = await Promise.allSettled([
         apiClient.getDashboard(),
         apiClient.getServices(),
         apiClient.getIncidents(),
@@ -92,7 +223,8 @@ export function AppProvider({ children }) {
         apiClient.getWebhookHistory(),
         apiClient.getMcpTools(),
         apiClient.getSdkStatus(),
-        apiClient.getChanges()
+        apiClient.getChanges(),
+        apiClient.getDependenciesGraph()
       ]);
 
       if (dash.status === 'fulfilled' && dash.value) {
@@ -142,10 +274,22 @@ export function AppProvider({ children }) {
         setLiveIncidents(incs.value.incidents);
       }
       if (chgs.status === 'fulfilled' && chgs.value?.changes) {
-        setChangesData(chgs.value.changes);
+        const changes = chgs.value.changes;
+        setChangesData(changes);
+        if (changes.length > 0) {
+          setSelectedIncidentApi(prev => {
+            const match = changes.find(c => c.serviceName === prev || c.serviceId === prev);
+            return match ? match.serviceName : changes[0].serviceName;
+          });
+        } else {
+          setSelectedIncidentApi(null);
+        }
       }
       if (deps.status === 'fulfilled' && deps.value?.dependencies) {
         setDependencies(deps.value.dependencies);
+      }
+      if (graph.status === 'fulfilled' && graph.value) {
+        setDependenciesGraph(graph.value);
       }
       if (whs.status === 'fulfilled' && whs.value?.events) {
         setWebhooks(whs.value.events);
@@ -167,6 +311,7 @@ export function AppProvider({ children }) {
 
   // Resolve service key and display name for multi-dependency support
   const resolveServiceKeyAndName = (input = selectedIncidentApi) => {
+    if (!input || input === 'auto') return { serviceKey: 'auto', displayName: 'Auto-Rotate', isUser: false };
     const raw = String(input || '').toLowerCase();
     if (raw.includes('user')) return { serviceKey: 'users', displayName: 'User API', isUser: true };
     if (raw.includes('weather')) return { serviceKey: 'weather', displayName: 'Weather API', isUser: false };
@@ -180,24 +325,84 @@ export function AppProvider({ children }) {
   };
 
   // Trigger Incident: Sends change to backend and runs monitoring pipeline
-  const triggerIncident = async (targetService = selectedIncidentApi) => {
-    const { serviceKey, displayName: serviceDisplayName, isUser } = resolveServiceKeyAndName(targetService);
+  const triggerIncident = async (targetService = 'auto') => {
+    // 1. Concurrency lock: prevent rapid or concurrent double-clicks
+    if (isSimulating) return;
 
-    setSelectedIncidentApi(serviceDisplayName);
+    // 2. Identify all services that currently have active, unresolved changes
+    const activeServiceKeys = new Set();
+    if (backendConnected && changesData.length > 0) {
+      changesData.forEach(c => {
+        if (c.serviceId) activeServiceKeys.add(c.serviceId.toLowerCase());
+        const res = resolveServiceKeyAndName(c.serviceName || c.serviceId);
+        if (res.serviceKey) activeServiceKeys.add(res.serviceKey.toLowerCase());
+      });
+    } else {
+      apis.forEach(a => {
+        if (a.status === 'Changed' || a.hasBreakingChange) {
+          const res = resolveServiceKeyAndName(a.name || a.id);
+          if (res.serviceKey) activeServiceKeys.add(res.serviceKey.toLowerCase());
+          if (a.id) activeServiceKeys.add(a.id.toLowerCase());
+        }
+      });
+    }
+
+    // 3. Resolve target service or auto-rotate to the next healthy service
+    let chosenServiceKey;
+    let chosenDisplayName;
+
+    if (!targetService || targetService === 'auto') {
+      const candidate = SIMULATABLE_SERVICES.find(s => !activeServiceKeys.has(s.id.toLowerCase()));
+      if (!candidate) {
+        addToast(
+          'All monitored services currently have active unresolved changes. Resolve an incident before simulating more.',
+          'warning',
+          'All Services Active'
+        );
+        return;
+      }
+      chosenServiceKey = candidate.id;
+      chosenDisplayName = candidate.name;
+    } else {
+      const { serviceKey, displayName } = resolveServiceKeyAndName(targetService);
+      // Guard: If explicitly selected service is already active, clearly inform the user
+      if (activeServiceKeys.has(serviceKey.toLowerCase())) {
+        const activeIncident = (backendConnected && liveIncidents.find(i => 
+          i.serviceId === serviceKey && !['VALIDATED', 'RESOLVED', 'CLOSED'].includes(i.status)
+        )) || (changesData.find(c => c.serviceId === serviceKey));
+        const incRef = activeIncident?.id || activeIncident?.incidentId || 'INC';
+        addToast(
+          `${displayName} already has an active unresolved change (${incRef}). Resolve it before simulating again or select another service.`,
+          'warning',
+          'Service Already Active'
+        );
+        return;
+      }
+      chosenServiceKey = serviceKey;
+      chosenDisplayName = displayName;
+    }
+
+    // 4. Execute simulation with loading state
+    setIsSimulating(true);
+    setSelectedIncidentApi(chosenDisplayName);
 
     try {
       // Real backend request
-      await apiClient.simulateChange(serviceKey);
+      await apiClient.simulateChange(chosenServiceKey);
       await apiClient.runMonitor();
       await fetchBackendData();
 
+      const serviceDef = SIMULATABLE_SERVICES.find(s => s.id === chosenServiceKey);
+      const detailMsg = serviceDef?.description || `${chosenDisplayName} contract modified`;
+
       setApis(prev => prev.map(a => {
-        if ((serviceKey === 'weather' && a.name === 'Weather API') || (serviceKey === 'users' && a.name === 'User API') || a.id === serviceKey || a.name === serviceDisplayName) {
+        const res = resolveServiceKeyAndName(a.name || a.id);
+        if (res.serviceKey === chosenServiceKey || a.name === chosenDisplayName || a.id === chosenServiceKey) {
           return {
             ...a,
             status: 'Changed',
-            responseTime: isUser ? '310 ms' : '480 ms',
-            uptime: isUser ? '99.1%' : '97.4%',
+            responseTime: chosenServiceKey === 'stripe' ? '480 ms' : (chosenServiceKey === 'users' ? '310 ms' : '450 ms'),
+            uptime: '97.4%',
             hasBreakingChange: true,
             lastChecked: 'Just now'
           };
@@ -208,10 +413,10 @@ export function AppProvider({ children }) {
       setActivities(prev => [
         {
           id: generateUniqueActivityId(),
-          apiName: serviceDisplayName,
+          apiName: chosenDisplayName,
           action: 'breaking change detected',
           timeAgo: 'Just now',
-          detail: isUser ? 'Missing field: name -> displayName' : 'Missing field: temp -> temperature, city -> city_name',
+          detail: detailMsg,
           statusColor: 'red',
           dotColor: '#EF4444',
           type: 'changed'
@@ -219,11 +424,15 @@ export function AppProvider({ children }) {
         ...prev
       ]);
 
-      addToast(`CRITICAL: ${serviceDisplayName} schema mismatch detected by autonomous listener!`, 'error', 'Incident Detected');
+      addToast(`CRITICAL: ${chosenDisplayName} schema mismatch detected by autonomous listener!`, 'error', 'Incident Detected');
     } catch {
       // Fallback local simulation
+      const serviceDef = SIMULATABLE_SERVICES.find(s => s.id === chosenServiceKey);
+      const detailMsg = serviceDef?.description || `${chosenDisplayName} contract modified`;
+
       setApis(prev => prev.map(a => {
-        if (a.name === serviceDisplayName || a.name === 'Stripe API') {
+        const res = resolveServiceKeyAndName(a.name || a.id);
+        if (res.serviceKey === chosenServiceKey || a.name === chosenDisplayName || a.id === chosenServiceKey) {
           return {
             ...a,
             status: 'Changed',
@@ -239,10 +448,10 @@ export function AppProvider({ children }) {
       setActivities(prev => [
         {
           id: generateUniqueActivityId(),
-          apiName: serviceDisplayName,
+          apiName: chosenDisplayName,
           action: 'breaking change detected',
           timeAgo: 'Just now',
-          detail: 'Response structure changed (autonomous detection)',
+          detail: detailMsg,
           statusColor: 'red',
           dotColor: '#EF4444',
           type: 'changed'
@@ -250,7 +459,9 @@ export function AppProvider({ children }) {
         ...prev
       ]);
 
-      addToast(`CRITICAL: ${serviceDisplayName} schema mismatch detected!`, 'error', 'Incident Detected');
+      addToast(`CRITICAL: ${chosenDisplayName} schema mismatch detected!`, 'error', 'Incident Detected');
+    } finally {
+      setIsSimulating(false);
     }
   };
 
@@ -265,6 +476,7 @@ export function AppProvider({ children }) {
     setApis(prev => prev.map(a => ({ ...a, status: 'Healthy', hasBreakingChange: false })));
     setChangesData([]);
     setLiveIncidents([]);
+    setSelectedIncidentApi(null);
     setActivities(initialRecentActivity);
     setRepairState('ready');
     setValidationState('idle');
@@ -312,11 +524,31 @@ export function AppProvider({ children }) {
   };
 
   // Apply AI Fix with real backend approval, adapter application, and regression validation
-  const applyFix = async (targetApi = selectedIncidentApi) => {
+  const applyFix = async (targetApi = null) => {
     setIsApplyingFix(true);
-    addToast(`Applying autonomous fix for ${targetApi} to adapter layer...`, 'info', 'AI Repair in Progress');
 
-    const { serviceKey, displayName, isUser } = resolveServiceKeyAndName(targetApi);
+    // 1. Determine target API dynamically
+    let resolvedTarget = targetApi;
+    if (!resolvedTarget || resolvedTarget === 'auto') {
+      if (selectedIncidentApi && selectedIncidentApi !== 'auto') {
+        resolvedTarget = selectedIncidentApi;
+      } else if (changesData && changesData.length > 0) {
+        resolvedTarget = changesData[0].serviceName || changesData[0].serviceId;
+      } else {
+        const changedApi = apis.find(a => a.status === 'Changed' || a.hasBreakingChange);
+        if (changedApi) resolvedTarget = changedApi.name || changedApi.id;
+      }
+    }
+
+    if (!resolvedTarget) {
+      setIsApplyingFix(false);
+      addToast('All monitored API services are healthy. No active changes require Auto Heal.', 'info', 'No Repair Needed');
+      return;
+    }
+
+    const { serviceKey, displayName, isUser } = resolveServiceKeyAndName(resolvedTarget);
+    setSelectedIncidentApi(displayName);
+    addToast(`Applying autonomous fix for ${displayName} to adapter layer...`, 'info', 'AI Repair in Progress');
 
     if (!backendConnected) {
       // Clean local sandbox mode
@@ -325,11 +557,12 @@ export function AppProvider({ children }) {
         setValidationState('passed');
         setValidationTests(prev => prev.map(t => ({ ...t, status: 'Passed' })));
         setApis(prev => prev.map(api => {
-          if (api.name === targetApi || (serviceKey === 'weather' && api.name === 'Weather API') || (serviceKey === 'users' && api.name === 'User API')) {
+          const res = resolveServiceKeyAndName(api.name || api.id);
+          if (res.serviceKey === serviceKey || api.name === displayName || api.name === resolvedTarget) {
             return {
               ...api,
               status: 'Healthy',
-              responseTime: api.name === 'User API' ? '190 ms' : '248 ms',
+              responseTime: serviceKey === 'users' ? '190 ms' : '248 ms',
               uptime: '99.9%',
               hasBreakingChange: false
             };
@@ -340,7 +573,7 @@ export function AppProvider({ children }) {
         setActivities(prev => [
           {
             id: generateUniqueActivityId(),
-            apiName: targetApi,
+            apiName: displayName,
             action: 'fix applied (local sandbox) & validated',
             timeAgo: 'Just now',
             timestamp: new Date().toISOString(),
@@ -352,107 +585,155 @@ export function AppProvider({ children }) {
           ...prev
         ]);
         setIsApplyingFix(false);
-        addToast(`${targetApi} schema repair applied & validated in local sandbox!`, 'success', 'Fix Applied & Resolved');
+        addToast(`${displayName} schema repair applied & validated in local sandbox!`, 'success', 'Fix Applied & Resolved');
         setActivePage('validation-recovery');
       }, 400);
       return;
     }
 
     try {
-      // 1. Fetch incidents
-      const incRes = await apiClient.getIncidents(`serviceId=${serviceKey}`);
-      let incident = incRes.incidents?.[0];
+      // 1. Locate the active unresolved incident
+      let incident = null;
+
+      // Check if changesData already has the incidentId
+      const matchingChange = changesData.find(c =>
+        c.serviceId === serviceKey ||
+        c.serviceName === displayName ||
+        c.serviceName === resolvedTarget
+      );
+      if (matchingChange?.incidentId) {
+        try {
+          const singleInc = await apiClient.getIncident(matchingChange.incidentId);
+          if (singleInc?.incident && !['VALIDATED', 'RESOLVED', 'CLOSED'].includes(singleInc.incident.status)) {
+            incident = singleInc.incident;
+          }
+        } catch {
+          // fallback to list query
+        }
+      }
 
       if (!incident) {
-        await apiClient.simulateChange(serviceKey);
-        const mon = await apiClient.runMonitor();
-        incident = mon.incidents?.find(i => i.serviceId === serviceKey) || mon.incidents?.[0];
+        const incRes = await apiClient.getIncidents(`serviceId=${serviceKey}`);
+        incident = incRes.incidents?.find(i =>
+          i.serviceId === serviceKey &&
+          !['VALIDATED', 'RESOLVED', 'CLOSED'].includes(i.status)
+        );
       }
 
-      if (incident) {
-        // 2. Generate Proposal
-        if (!incident.repairProposal) {
-          const propRes = await apiClient.proposeFix(incident.id);
-          incident = propRes.incident || incident;
-        }
+      // If still no incident, run monitor to detect any pending drift
+      if (!incident) {
+        const mon = await apiClient.runMonitor();
+        incident = mon.incidents?.find(i =>
+          i.serviceId === serviceKey &&
+          !['VALIDATED', 'RESOLVED', 'CLOSED'].includes(i.status)
+        );
+      }
 
-        // 3. Apply with explicit human approval
-        await apiClient.applyFix(incident.id, settings.userFullName || 'Human Reviewer');
+      if (!incident) {
+        throw new Error(`No active unresolved incident found for ${displayName}. Service is already healthy.`);
+      }
 
-        // 4. Validate regression suite
-        const valRes = await apiClient.validateIncident(incident.id);
-        const isPassed = Boolean(valRes?.validation?.passed);
+      // 2. Generate Repair Proposal
+      if (!incident.repairProposal) {
+        const propRes = await apiClient.proposeFix(incident.id);
+        incident = propRes.incident || incident;
+      }
 
-        // 5. Test Live Proxy Endpoint
+      // 3. Apply with explicit human approval
+      await apiClient.applyFix(incident.id, settings.userFullName || 'Human Reviewer');
+
+      // 4. Validate regression suite
+      const valRes = await apiClient.validateIncident(incident.id);
+      const isPassed = Boolean(valRes?.validation?.passed);
+
+      // 5. Query live gateway proxy
+      try {
         const proxyRes = await apiClient.getProxy(serviceKey);
         setProxyResponse(proxyRes);
-
-        // 6. Map test checks to validationTestsList
-        if (valRes?.validation?.checks) {
-          setValidationTests(valRes.validation.checks.slice(0, 5).map((chk, i) => ({
-            id: `vt-${i + 1}`,
-            name: chk.category || chk.name.replace(/_/g, ' ').toUpperCase(),
-            duration: '< 15ms',
-            status: chk.passed ? 'Passed' : 'Failed',
-            details: chk.message || `${chk.name}: ${chk.actual}`
-          })));
-        }
-
-        if (isPassed) {
-          setRepairState('applied');
-          setValidationState('passed');
-
-          setApis(prev => prev.map(api => {
-            if (api.name === targetApi || (serviceKey === 'weather' && api.name === 'Weather API') || (serviceKey === 'users' && api.name === 'User API')) {
-              return {
-                ...api,
-                status: 'Healthy',
-                responseTime: api.name === 'User API' ? '190 ms' : '248 ms',
-                uptime: '99.9%',
-                hasBreakingChange: false
-              };
-            }
-            return api;
-          }));
-
-          setChangesData(prev => prev.filter(c => c.serviceId !== serviceKey && c.serviceName !== targetApi));
-
-          setLiveIncidents(prev => prev.map(inc => {
-            if (inc.id === incident.id || inc.serviceId === serviceKey) {
-              return { ...inc, status: 'VALIDATED', resolved: true, resolvedAt: new Date().toISOString() };
-            }
-            return inc;
-          }));
-
-          setActivities(prev => [
-            {
-              id: generateUniqueActivityId(),
-              apiName: targetApi,
-              action: 'fix applied automatically & validated',
-              timeAgo: 'Just now',
-              timestamp: new Date().toISOString(),
-              detail: 'Compatibility adapter active on gateway layer',
-              statusColor: 'green',
-              dotColor: '#10B981',
-              type: 'resolved'
-            },
-            ...prev
-          ]);
-
-          addToast(`${targetApi} schema repair applied & validated!`, 'success', 'Fix Applied & Resolved');
-        } else {
-          setRepairState('ready');
-          setValidationState('failed');
-          addToast(`Regression validation failed for ${targetApi}. Incident count not reduced.`, 'error', 'Validation Failed');
-        }
+      } catch {
+        // optional proxy check
       }
 
-      await fetchBackendData();
+      // 6. Map test checks to validationTestsList
+      if (valRes?.validation?.checks) {
+        setValidationTests(valRes.validation.checks.slice(0, 5).map((chk, i) => ({
+          id: `vt-${i + 1}`,
+          name: chk.category || chk.name.replace(/_/g, ' ').toUpperCase(),
+          duration: '< 15ms',
+          status: chk.passed ? 'Passed' : 'Failed',
+          details: chk.message || `${chk.name}: ${chk.actual}`
+        })));
+      }
+
+      if (isPassed) {
+        setRepairState('applied');
+        setValidationState('passed');
+
+        // Mark service as Healthy in apis list
+        setApis(prev => prev.map(api => {
+          const res = resolveServiceKeyAndName(api.name || api.id);
+          const isMatch = api.name === resolvedTarget ||
+            api.name === displayName ||
+            api.id === serviceKey ||
+            res.serviceKey === serviceKey;
+          if (isMatch) {
+            return {
+              ...api,
+              status: 'Healthy',
+              responseTime: serviceKey === 'users' ? '190 ms' : '248 ms',
+              uptime: '99.9%',
+              hasBreakingChange: false
+            };
+          }
+          return api;
+        }));
+
+        // Remove from changesData
+        setChangesData(prev => prev.filter(c => c.serviceId !== serviceKey && c.serviceName !== resolvedTarget && c.serviceName !== displayName));
+
+        // Mark incident as validated in liveIncidents
+        setLiveIncidents(prev => prev.map(inc => {
+          if (inc.id === incident.id || inc.serviceId === serviceKey) {
+            return { ...inc, status: 'VALIDATED', resolved: true, resolvedAt: new Date().toISOString() };
+          }
+          return inc;
+        }));
+
+        setActivities(prev => [
+          {
+            id: generateUniqueActivityId(),
+            apiName: displayName,
+            action: 'fix applied automatically & validated',
+            timeAgo: 'Just now',
+            timestamp: new Date().toISOString(),
+            detail: 'Compatibility adapter active on gateway layer',
+            statusColor: 'green',
+            dotColor: '#10B981',
+            type: 'resolved'
+          },
+          ...prev
+        ]);
+
+        addToast(`${displayName} schema repair applied & validated!`, 'success', 'Fix Applied & Resolved');
+
+        // Refresh all backend data
+        await fetchBackendData();
+
+        // Advance selectedIncidentApi to next remaining unresolved change (if any)
+        setSelectedIncidentApi(prev => {
+          const remaining = (changesData || []).filter(c => c.serviceId !== serviceKey && c.serviceName !== displayName && c.serviceName !== resolvedTarget);
+          return remaining.length > 0 ? remaining[0].serviceName : null;
+        });
+      } else {
+        setRepairState('ready');
+        setValidationState('failed');
+        addToast(`Regression validation failed for ${displayName}. Incident count not reduced.`, 'error', 'Validation Failed');
+      }
     } catch (err) {
       console.error('[API Patch] applyFix error:', err);
       setRepairState('ready');
       setValidationState('failed');
-      addToast(`Repair failed for ${targetApi}: ${err.message}`, 'error', 'Repair Failed');
+      addToast(`Repair failed for ${displayName}: ${err.message}`, 'error', 'Repair Failed');
     } finally {
       setIsApplyingFix(false);
     }
@@ -562,10 +843,19 @@ export function AppProvider({ children }) {
             details: chk.message || `${chk.name}: ${chk.actual}`
           })));
         }
-      }
 
-      setValidationState('passed');
-      addToast('All 5 validation tests passed with 100% integrity!', 'success', 'All Tests Passed');
+        if (valRes.validation?.passed) {
+          setValidationState('passed');
+          addToast('All 5 validation tests passed with 100% integrity!', 'success', 'All Tests Passed');
+        } else {
+          setValidationState('failed');
+          addToast('One or more validation tests failed.', 'error', 'Validation Failed');
+        }
+      } else {
+        setValidationState('passed');
+        setValidationTests(prev => prev.map(t => ({ ...t, status: 'Passed' })));
+        addToast('All 5 validation tests passed with 100% integrity!', 'success', 'All Tests Passed');
+      }
     } catch {
       setTimeout(() => {
         setValidationTests(prev => prev.map(t => ({ ...t, status: 'Passed' })));
@@ -596,7 +886,7 @@ export function AppProvider({ children }) {
   );
 
   const unresolvedCount = backendConnected
-    ? (changesData.length > 0 ? changesData.length : unresolvedIncidents.length)
+    ? changesData.length
     : apis.filter(a => a.status === 'Changed').length;
 
   const totalApisCount = apis.length;
@@ -643,6 +933,8 @@ export function AppProvider({ children }) {
         setIsRollbackModalOpen,
         selectedEndpointDetail,
         setSelectedEndpointDetail,
+        isSimulating,
+        SIMULATABLE_SERVICES,
         settings,
         setSettings,
         toasts,
@@ -666,6 +958,7 @@ export function AppProvider({ children }) {
         resolvedCount,
         totalDetectedCount,
         dependencies,
+        dependenciesGraph,
         webhooks,
         mcpTools,
         sdkStatus,
@@ -675,7 +968,14 @@ export function AppProvider({ children }) {
         formatLocalTime,
         formatRelativeTime,
         getCurrentLocalDate,
-        getCurrentLocalTime
+        getCurrentLocalTime,
+        // Authentication Context
+        currentUser,
+        authToken,
+        authLoading,
+        loginUser,
+        signupUser,
+        logoutUser
       }}
     >
       {children}

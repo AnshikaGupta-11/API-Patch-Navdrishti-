@@ -10,7 +10,7 @@
       "changed": false,
       "uptime": "97.4%",
       "responseTimeMs": 240,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -40,12 +40,12 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 210,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
           "id": 1,
-          "name": "Rahul"
+          "display_name": "Rahul"
         }
       },
       "dependentWorkflows": [
@@ -66,7 +66,7 @@
       "changed": false,
       "uptime": "99.8%",
       "responseTimeMs": 185,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -94,7 +94,7 @@
       "changed": false,
       "uptime": "99.8%",
       "responseTimeMs": 320,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -117,11 +117,11 @@
       "type": "Rate-Limited Service",
       "description": "VCS API with rate limiting and version headers",
       "endpoint": "https://api.github.com/v3",
-      "status": "DEGRADED",
-      "changed": true,
+      "status": "HEALTHY",
+      "changed": false,
       "uptime": "99.7%",
       "responseTimeMs": 260,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "headers": {
@@ -150,7 +150,7 @@
       "changed": false,
       "uptime": "99.8%",
       "responseTimeMs": 220,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "responseTimeMs": 220,
@@ -176,7 +176,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 210,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -201,7 +201,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 140,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -228,7 +228,7 @@
       "changed": false,
       "uptime": "99.9%",
       "responseTimeMs": 95,
-      "lastObservedAt": "2026-10-11T21:17:35.317Z",
+      "lastObservedAt": "2026-10-12T02:34:46.963Z",
       "current": {
         "statusCode": 200,
         "body": {
@@ -299,7 +299,8 @@
     "github": {
       "statusCode": 200,
       "headers": {
-        "x-ratelimit-limit": "5000"
+        "x-ratelimit-limit": "5000",
+        "x-ratelimit-remaining": "4990"
       },
       "body": {
         "status": "operational"
@@ -501,70 +502,264 @@
       ],
       "from": "temperature",
       "to": "temp",
-      "appliedAt": "2026-10-11T21:17:45.078Z",
+      "appliedAt": "2026-10-12T02:35:10.905Z",
+      "enabled": true
+    },
+    "users": {
+      "serviceId": "users",
+      "type": "FIELD_MAPPING",
+      "mappings": [
+        {
+          "from": "display_name",
+          "to": "name"
+        }
+      ],
+      "from": "display_name",
+      "to": "name",
+      "appliedAt": "2026-10-12T02:35:18.775Z",
       "enabled": true
     }
   },
   "incidents": [
     {
       "id": "INC-002",
-      "serviceId": "github",
-      "serviceName": "GitHub API",
-      "status": "DETECTED",
-      "severity": "MEDIUM",
+      "serviceId": "users",
+      "serviceName": "Users API",
+      "status": "VALIDATED",
+      "severity": "HIGH",
       "changes": [
         {
-          "kind": "HEADER_ADDED",
-          "path": "$headers.x-ratelimit-remaining",
-          "severity": "MINOR",
-          "actual": "4990",
-          "message": "Header added: x-ratelimit-remaining"
+          "kind": "MISSING_FIELD",
+          "path": "name",
+          "severity": "BREAKING",
+          "expected": "Rahul",
+          "renamedTo": "display_name",
+          "message": "Field \"name\" renamed to \"display_name\""
+        },
+        {
+          "kind": "ADDED_FIELD",
+          "path": "display_name",
+          "severity": "BREAKING",
+          "actual": "Rahul",
+          "renamedFrom": "name",
+          "message": "New field \"display_name\" replaces \"name\""
+        },
+        {
+          "kind": "FIELD_RENAMED",
+          "path": "name",
+          "targetPath": "display_name",
+          "severity": "BREAKING",
+          "expected": "name",
+          "actual": "display_name",
+          "rename": {
+            "from": "name",
+            "to": "display_name"
+          },
+          "message": "Field \"name\" renamed to \"display_name\""
         }
       ],
       "impact": {
-        "affectedWorkflows": [],
+        "affectedWorkflows": [
+          "Profile Page",
+          "Greeting Service"
+        ],
         "affectedServicesAndPages": {
-          "totalAffected": 0,
-          "frontendPages": [],
-          "backendServices": [],
+          "totalAffected": 2,
+          "frontendPages": [
+            "Profile Page"
+          ],
+          "backendServices": [
+            "Greeting Service"
+          ],
           "externalIntegrations": []
         },
         "impactSeverity": {
-          "high": 0,
+          "high": 3,
           "medium": 0,
-          "low": 1
+          "low": 0
         },
         "affectedEndpoints": [
           {
-            "endpoint": "/api/github/current",
+            "endpoint": "GET /v1/users/1",
+            "service": "SDK Adapter",
+            "impact": "High",
+            "description": "Missing name property on User entity"
+          },
+          {
+            "endpoint": "/api/users/current",
             "service": "Frontend",
-            "impact": "Low",
-            "description": "Header added: x-ratelimit-remaining",
-            "field": "$headers.x-ratelimit-remaining"
+            "impact": "High",
+            "description": "New field \"display_name\" replaces \"name\"",
+            "field": "display_name"
+          },
+          {
+            "endpoint": "GET /v1/users/1",
+            "service": "SDK Adapter",
+            "impact": "High",
+            "description": "Missing name property on User entity"
           }
         ],
         "details": [
           {
-            "field": "$headers.x-ratelimit-remaining",
-            "changeKind": "HEADER_ADDED",
-            "severity": "MINOR",
+            "field": "name",
+            "changeKind": "MISSING_FIELD",
+            "severity": "BREAKING",
+            "workflows": [
+              "Profile Page",
+              "Greeting Service"
+            ]
+          },
+          {
+            "field": "display_name",
+            "changeKind": "ADDED_FIELD",
+            "severity": "BREAKING",
             "workflows": []
+          },
+          {
+            "field": "name",
+            "changeKind": "FIELD_RENAMED",
+            "severity": "BREAKING",
+            "workflows": [
+              "Profile Page",
+              "Greeting Service"
+            ]
           }
         ],
-        "totalAffectedWorkflows": 0,
-        "note": "No direct dependency was found in the configured dependency map; review manually."
+        "totalAffectedWorkflows": 2,
+        "note": "Impact is calculated from the registered dependency architecture graph."
       },
-      "repairProposal": null,
-      "validation": null,
-      "createdAt": "2026-10-11T21:17:35.317Z",
-      "updatedAt": "2026-10-11T21:17:35.317Z",
+      "repairProposal": {
+        "id": "PROP-1791772518761",
+        "type": "FIELD_MAPPING",
+        "serviceId": "users",
+        "mapping": {
+          "from": "display_name",
+          "to": "name"
+        },
+        "mappings": [
+          {
+            "from": "display_name",
+            "to": "name"
+          }
+        ],
+        "diff": "- name: data.name\n+ display_name: data.display_name",
+        "adapterCode": "// Compatibility Adapter for Users API / SDK\nfunction adapt(data) {\n  if (data.display_name !== undefined) {\n    data.name = data.display_name;\n    delete data.display_name;\n  }\n  return data;\n}",
+        "rationale": "Upstream User service/SDK renamed \"name\" to \"display_name\". Adapter restores expected contract.",
+        "risk": "MEDIUM",
+        "confidence": 0.95,
+        "requiresHumanApproval": true,
+        "approved": true,
+        "suggestedAction": "Apply Automatically with explicit approval",
+        "approvedAt": "2026-10-12T02:35:18.775Z",
+        "approvedBy": "Chinmay Bulani"
+      },
+      "validation": {
+        "passed": true,
+        "status": "PASSED",
+        "ranAt": "2026-10-12T02:35:18.784Z",
+        "checks": [
+          {
+            "name": "http_status_matches",
+            "category": "API Response Structure",
+            "expected": 200,
+            "actual": 200,
+            "passed": true,
+            "message": "HTTP status 200 matches baseline"
+          },
+          {
+            "name": "required_field:id",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "required_field:name",
+            "category": "Data Integrity",
+            "expected": "present",
+            "actual": "present",
+            "passed": true
+          },
+          {
+            "name": "name_value_preserved",
+            "category": "Data Integrity",
+            "expected": "Rahul",
+            "actual": "Rahul",
+            "passed": true
+          },
+          {
+            "name": "dependent_services_compatibility",
+            "category": "Dependent Services",
+            "expected": "contracts_satisfied",
+            "actual": "contracts_satisfied",
+            "passed": true
+          },
+          {
+            "name": "frontend_pages_operability",
+            "category": "Frontend Functionality",
+            "expected": "all_views_healthy",
+            "actual": "all_views_healthy",
+            "passed": true
+          },
+          {
+            "name": "adapter_performance_overhead",
+            "category": "Performance Check",
+            "expected": "< 50ms overhead",
+            "actual": "1ms",
+            "passed": true
+          },
+          {
+            "name": "no_contract_differences",
+            "category": "Contract Compliance",
+            "expected": 0,
+            "actual": 0,
+            "passed": true
+          }
+        ],
+        "summary": {
+          "totalChecks": 8,
+          "passedChecks": 8,
+          "failedChecks": 0
+        },
+        "normalizedResponse": {
+          "statusCode": 200,
+          "body": {
+            "id": 1,
+            "name": "Rahul"
+          }
+        },
+        "remainingChanges": [],
+        "logs": [
+          "[2026-10-12T02:35:18.784Z] Initiating regression validation for service \"Users API\" (users)",
+          "Validation finished. Status: PASSED"
+        ]
+      },
+      "createdAt": "2026-10-12T02:34:46.963Z",
+      "updatedAt": "2026-10-12T02:35:18.784Z",
       "history": [
         {
           "status": "DETECTED",
-          "timestamp": "2026-10-11T21:17:35.317Z",
-          "message": "Detected 1 contract difference(s) on GitHub API"
+          "timestamp": "2026-10-12T02:34:46.963Z",
+          "message": "Detected 3 contract difference(s) on Users API"
+        },
+        {
+          "status": "REPAIR_PROPOSED",
+          "timestamp": "2026-10-12T02:35:18.761Z",
+          "message": "Repair proposal generated (FIELD_MAPPING). Awaiting explicit human approval."
+        },
+        {
+          "status": "REPAIR_APPLIED",
+          "timestamp": "2026-10-12T02:35:18.775Z",
+          "message": "Approved compatibility adapter applied by Chinmay Bulani"
+        },
+        {
+          "status": "VALIDATED",
+          "timestamp": "2026-10-12T02:35:18.784Z",
+          "message": "All 5 regression validation test suites passed. Incident resolved."
         }
-      ]
+      ],
+      "resolved": true,
+      "resolvedAt": "2026-10-12T02:35:18.784Z"
     },
     {
       "id": "INC-001",
@@ -781,7 +976,7 @@
         "note": "Impact is calculated from the registered dependency architecture graph."
       },
       "repairProposal": {
-        "id": "PROP-1791753465069",
+        "id": "PROP-1791772510894",
         "type": "FIELD_MAPPING",
         "serviceId": "weather",
         "mapping": {
@@ -805,13 +1000,13 @@
         "requiresHumanApproval": true,
         "approved": true,
         "suggestedAction": "Apply Automatically with explicit approval",
-        "approvedAt": "2026-10-11T21:17:45.078Z",
+        "approvedAt": "2026-10-12T02:35:10.905Z",
         "approvedBy": "Chinmay Bulani"
       },
       "validation": {
         "passed": true,
         "status": "PASSED",
-        "ranAt": "2026-10-11T21:17:45.088Z",
+        "ranAt": "2026-10-12T02:35:10.919Z",
         "checks": [
           {
             "name": "http_status_matches",
@@ -901,42 +1096,62 @@
         },
         "remainingChanges": [],
         "logs": [
-          "[2026-10-11T21:17:45.088Z] Initiating regression validation for service \"Weather API\" (weather)",
+          "[2026-10-12T02:35:10.919Z] Initiating regression validation for service \"Weather API\" (weather)",
           "Validation finished. Status: PASSED"
         ]
       },
-      "createdAt": "2026-10-11T21:17:35.317Z",
-      "updatedAt": "2026-10-11T21:17:45.088Z",
+      "createdAt": "2026-10-12T02:34:45.545Z",
+      "updatedAt": "2026-10-12T02:35:10.919Z",
       "history": [
         {
           "status": "DETECTED",
-          "timestamp": "2026-10-11T21:17:35.317Z",
+          "timestamp": "2026-10-12T02:34:45.545Z",
           "message": "Detected 6 contract difference(s) on Weather API"
         },
         {
           "status": "REPAIR_PROPOSED",
-          "timestamp": "2026-10-11T21:17:45.069Z",
+          "timestamp": "2026-10-12T02:35:10.894Z",
           "message": "Repair proposal generated (FIELD_MAPPING). Awaiting explicit human approval."
         },
         {
           "status": "REPAIR_APPLIED",
-          "timestamp": "2026-10-11T21:17:45.078Z",
+          "timestamp": "2026-10-12T02:35:10.905Z",
           "message": "Approved compatibility adapter applied by Chinmay Bulani"
         },
         {
           "status": "VALIDATED",
-          "timestamp": "2026-10-11T21:17:45.088Z",
+          "timestamp": "2026-10-12T02:35:10.919Z",
           "message": "All 5 regression validation test suites passed. Incident resolved."
         }
       ],
       "resolved": true,
-      "resolvedAt": "2026-10-11T21:17:45.088Z"
+      "resolvedAt": "2026-10-12T02:35:10.919Z"
     }
   ],
   "recentActivity": [
     {
-      "id": "act-1791753465088-locrmu",
-      "timestamp": "2026-10-11T21:17:45.088Z",
+      "id": "act-1791772518784-4vam46",
+      "timestamp": "2026-10-12T02:35:18.784Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API",
+      "type": "RESOLVED",
+      "badge": "resolved",
+      "message": "Users API - issue resolved and validated"
+    },
+    {
+      "id": "act-1791772518775-wmtuqz",
+      "timestamp": "2026-10-12T02:35:18.775Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API",
+      "type": "RESOLVED",
+      "badge": "repaired",
+      "message": "Compatibility adapter applied for Users API"
+    },
+    {
+      "id": "act-1791772510919-n1rl6h",
+      "timestamp": "2026-10-12T02:35:10.919Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
@@ -945,8 +1160,8 @@
       "message": "Weather API - issue resolved and validated"
     },
     {
-      "id": "act-1791753465078-wtfa9b",
-      "timestamp": "2026-10-11T21:17:45.078Z",
+      "id": "act-1791772510905-421l4u",
+      "timestamp": "2026-10-12T02:35:10.905Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
@@ -955,18 +1170,28 @@
       "message": "Compatibility adapter applied for Weather API"
     },
     {
-      "id": "act-1791753455317-n6taow",
-      "timestamp": "2026-10-11T21:17:35.317Z",
+      "id": "act-1791772486963-tbshci",
+      "timestamp": "2026-10-12T02:34:46.963Z",
       "timeAgo": "Just now",
-      "serviceId": "github",
-      "serviceName": "GitHub API",
+      "serviceId": "users",
+      "serviceName": "Users API",
       "type": "CHANGED",
-      "badge": "changed",
-      "message": "GitHub API contract change detected (1 change(s))"
+      "badge": "breaking",
+      "message": "Users API contract change detected (3 change(s))"
     },
     {
-      "id": "act-1791753455317-vystsi",
-      "timestamp": "2026-10-11T21:17:35.317Z",
+      "id": "act-1791772486865-iv80p6",
+      "timestamp": "2026-10-12T02:34:46.865Z",
+      "timeAgo": "Just now",
+      "serviceId": "users",
+      "serviceName": "Users API",
+      "type": "CHANGED",
+      "badge": "changed",
+      "message": "Users API response changed (name renamed to display_name)"
+    },
+    {
+      "id": "act-1791772485545-01nzel",
+      "timestamp": "2026-10-12T02:34:45.545Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
@@ -975,8 +1200,8 @@
       "message": "Weather API contract change detected (6 change(s))"
     },
     {
-      "id": "act-1791753455304-d4zlw2",
-      "timestamp": "2026-10-11T21:17:35.304Z",
+      "id": "act-1791772485448-sk7a3n",
+      "timestamp": "2026-10-12T02:34:45.448Z",
       "timeAgo": "Just now",
       "serviceId": "weather",
       "serviceName": "Weather API",
@@ -992,7 +1217,7 @@
       "badge": "normal",
       "message": "Stripe API - back to normal (Resolved automatically)",
       "timeAgo": "1 hour ago",
-      "timestamp": "2026-10-11T20:17:28.740Z"
+      "timestamp": "2026-10-12T01:34:39.176Z"
     },
     {
       "id": "act-2",
@@ -1002,7 +1227,7 @@
       "badge": "healthy",
       "message": "OpenAI API - healthy (No issues)",
       "timeAgo": "2 hours ago",
-      "timestamp": "2026-10-11T19:17:28.740Z"
+      "timestamp": "2026-10-12T00:34:39.176Z"
     }
   ],
   "nextIncidentNumber": 3,
